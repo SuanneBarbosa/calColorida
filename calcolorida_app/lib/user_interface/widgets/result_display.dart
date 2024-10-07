@@ -17,7 +17,7 @@ class ResultDisplay extends StatelessWidget {
       child: Text(
         display,
         style: const TextStyle(
-          fontSize: 35,
+          fontSize: 30,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
