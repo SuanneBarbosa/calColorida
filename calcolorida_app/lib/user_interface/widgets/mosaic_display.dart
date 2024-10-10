@@ -12,30 +12,43 @@ class MosaicDisplay extends StatelessWidget {
   }
 
   Widget _buildMosaic(String result) {
-    if (result.contains('.')) { // Verifica se result contém ponto decimal
-      // Extrair a parte decimal do resultado
+    if (result.contains('.')) {
       String decimalPart = result.split('.')[1];
 
-      // Criar uma lista de widgets para cada quadrado do mosaico
-      List<Widget> mosaicTiles = decimalPart
-          .split('')
-          .map((digit) => Container(
-            width: 20, // Ajustar o tamanho do quadrado
-            height: 20, // Ajustar o tamanho do quadrado
-            decoration: BoxDecoration(
-              color: digitColors[digit], // Obter a cor do mapa
-              border: Border.all(color: Colors.black, width: 1), // Adicione borda ao quadrado
-            ),
+      // Quebrar a parte decimal em grupos de 10 dígitos
+      List<List<String>> decimalGroups = [];
+      for (var i = 0; i < decimalPart.length; i += 10) {
+        // Extrair a substring, garantindo que não ultrapasse o final da string
+        int endIndex = i + 10;
+        if (endIndex > decimalPart.length) {
+          endIndex = decimalPart.length;
+        }
+        decimalGroups.add(decimalPart.substring(i, endIndex).split(''));
+      }
+
+      // Criar uma lista de widgets para cada linha do mosaico
+      List<Widget> mosaicRows = decimalGroups
+          .map((group) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: group
+                .map((digit) => Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: digitColors[digit],
+                border: Border.all(color: Colors.black, width: 1),
+              ),
+            ))
+                .toList(),
           ))
           .toList();
 
-      // Retornar um Row com os quadrados do mosaico
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center, // Centralizar os quadrados
-        children: mosaicTiles,
+      // Retorna um Column com as linhas do mosaico
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: mosaicRows,
       );
     } else {
-      // Retorna um Container vazio se a parte decimal for vazia
       return Container();
     }
   }

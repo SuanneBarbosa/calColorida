@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-
 class CalculatorController {
   String _display = '0';
   String _currentNumber = '';
@@ -11,8 +10,9 @@ class CalculatorController {
   bool _hasDecimal = false;
   String _expression = '';
   int _decimalPlaces = 2; // Número padrão de casas decimais
-  
-  
+  int _maxDecimalPlaces = 100; // Máximo de casas decimais
+
+  // ... (restante do código)
 
   String get display => _display;
   String get expression => _expression;
@@ -51,7 +51,7 @@ class CalculatorController {
       _calculateFactorial();
       _expression += '!';
     } else if (key == '<-') {
-      if (_currentNumber.isEmpty) { 
+      if (_currentNumber.isEmpty) {
         // Se _currentNumber estiver vazio (resultado), ignora backspace
       } else {
         _backspace();
@@ -171,19 +171,19 @@ class CalculatorController {
     }
   }
 
-  void setDecimalPlaces(int decimalPlaces) {////////////////////////////////
-    if (decimalPlaces >= 0) {
+  void setDecimalPlaces(int decimalPlaces) {
+    if (decimalPlaces >= 0 && decimalPlaces <= _maxDecimalPlaces) {
       _decimalPlaces = decimalPlaces;
     }
   }
 
-  void _updateDisplay() {////////////////////////////////////////////////////////////
+  void _updateDisplay() {
     // Mostra o resultado formatado com o número correto de casas decimais
-  if (_currentNumber.isEmpty) {
-    _display = _result.toStringAsFixed(_decimalPlaces);
-  } else {
-    _display = _currentNumber;
-  }
+    if (_currentNumber.isEmpty) {
+      _display = _result.toStringAsFixed(_decimalPlaces);
+    } else {
+      _display = _currentNumber;
+    }
 
     // Verifica se o display termina com um ponto decimal isolado e remove-o
     if (_display.endsWith('.')) {
@@ -201,7 +201,7 @@ class CalculatorController {
     }
   }
 
-  void _calculateSqrt() { //////////////////////////////////////////////////
+  void _calculateSqrt() {
     if (_currentNumber.isNotEmpty) {
       try {
         double number = double.parse(_currentNumber);
@@ -238,7 +238,7 @@ class CalculatorController {
     }
   }
 
-  void _calculateInverse() { //////////////////////////////////////
+  void _calculateInverse() {
     if (_currentNumber.isNotEmpty) {
       try {
         double number = double.parse(_currentNumber);

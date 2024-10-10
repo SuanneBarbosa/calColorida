@@ -32,10 +32,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       body: Column(
         children: [
           Expanded(
-            flex: 2, // Ajuste o tamanho do display conforme necessário
-            child: Padding(
-              padding: const EdgeInsets.all(16.0), // Ajuste o padding conforme necessário
-              child: MosaicDisplay(result: _controller.display, digitColors: _controller.digitColors), /////////////////////////////////////////////////////// Diferença
+            flex: 3, // Ajuste o tamanho do display conforme necessário
+            child: Container( // Adiciona um Container aqui
+              decoration: BoxDecoration(
+                color: Colors.yellow[10], // Define a cor do fundo
+                borderRadius: BorderRadius.circular(20), // Define o raio do arredondamento
+                // border: Border.all(color: Colors.black, width: 2), // Adiciona uma borda
+              ),
+              padding: const EdgeInsets.all(1.50), // Ajuste o padding conforme necessário
+              child: MosaicDisplay(result: _controller.display, digitColors: _controller.digitColors),
             ),
           ),
           Expanded( // Envolve o display e keypad com Expanded
@@ -77,7 +82,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Definir Casas Decimais'),
+          // title: Text('Definir Casas Decimais'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
