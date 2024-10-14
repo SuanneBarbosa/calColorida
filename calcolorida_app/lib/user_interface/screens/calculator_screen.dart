@@ -1,9 +1,8 @@
-import 'package:calcolorida_app/user_interface/widgets/mosaic_display.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/calculator_controller.dart';
 import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
-// import 'package:decimal/decimal.dart';
+import '../widgets/mosaic_display.dart'; // Certifique-se de importar o MosaicDisplay
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({Key? key}) : super(key: key);
@@ -14,17 +13,18 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final CalculatorController _controller = CalculatorController();
+  int _mosaicDecimalPlaces = 270; // Valor padrão
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Musical Colorida'),
-        actions: [ // Adiciona o ícone de ferramenta na AppBar
+        actions: [
           IconButton(
-            icon: Icon(Icons.settings),  // Ícone de ferramenta
+            icon: Icon(Icons.settings),
             onPressed: () {
-              _openDecimalModal();  // Chama a função para abrir o modal
+              _openDecimalModal();
             },
           ),
         ],
@@ -32,20 +32,46 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       body: Column(
         children: [
           Expanded(
-            flex: 3, // Ajuste o tamanho do display conforme necessário
-            child: Container( // Adiciona um Container aqui
+            flex: 3,
+            child: Container(
               decoration: BoxDecoration(
-                color: Colors.yellow[10], // Define a cor do fundo
-                borderRadius: BorderRadius.circular(20), // Define o raio do arredondamento
-                // border: Border.all(color: Colors.black, width: 2), // Adiciona uma borda
+                color: Colors.yellow[10],
+                borderRadius: BorderRadius.circular(20),
               ),
-              padding: const EdgeInsets.all(1.50), // Ajuste o padding conforme necessário
-              child: MosaicDisplay(result: _controller.display, digitColors: _controller.digitColors),
+              padding: const EdgeInsets.all(1.50),
+              child: MosaicDisplay(
+                result: _controller.display,
+                digitColors: _controller.digitColors,
+                decimalPlaces: _mosaicDecimalPlaces,
+              ),
             ),
           ),
-          Expanded( // Envolve o display e keypad com Expanded
-            flex: 4,  // Ajuste o flex conforme necessário
-            child: Card( // Adiciona o Card aqui
+          // Adicionar o Slider aqui
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                Text('Número de casas decimais:'),
+                Expanded(
+                  child: Slider(
+                    value: _mosaicDecimalPlaces.toDouble(),
+                    min: 1,
+                    max: 270,
+                    divisions: 20,
+                    label: _mosaicDecimalPlaces.toString(),
+                    onChanged: (double value) {
+                      setState(() {
+                        _mosaicDecimalPlaces = value.toInt();
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Card(
               margin: EdgeInsets.all(20),
               color: Colors.grey[300],
               shape: RoundedRectangleBorder(
@@ -56,7 +82,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Expanded(
                     flex: 1,
                     child: Padding(
-                      padding: EdgeInsets.all(15),
+                      padding: EdgeInsets.all(12),
                       child: ResultDisplay(display: _controller.display),
                     ),
                   ),
@@ -76,13 +102,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  // Função que abre o modal
+  // Função que abre o modal (pode ser mantida ou removida conforme necessário)
   void _openDecimalModal() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          // title: Text('Definir Casas Decimais'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -92,8 +117,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 decoration: InputDecoration(
                   labelText: 'Casas decimais',
                 ),
-                onChanged: (value) { ////////////////////Diferença
-                  _controller.setDecimalPlaces(int.tryParse(value) ?? 2);  // Define o número de casas decimais
+                onChanged: (value) {
+                  int decimalPlaces = int.tryParse(value) ?? 2;
+                  setState(() {
+                    _controller.setDecimalPlaces(decimalPlaces);
+                    // Atualiza o mosaico se necessário
+                    if (_mosaicDecimalPlaces > decimalPlaces) {
+                      _mosaicDecimalPlaces = decimalPlaces;
+                    }
+                  });
                 },
               ),
             ],
@@ -117,10 +149,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
+  // Função para lidar com teclas pressionadas
   void _handleKeyPress(String key) {
     setState(() {
       _controller.processKey(key);
     });
   }
-
 }
