@@ -1,36 +1,64 @@
 import 'package:flutter/material.dart';
 
-class MosaicDisplay extends StatelessWidget {
+class MosaicDisplay extends StatefulWidget {
   final String result;
   final Map<String, Color> digitColors;
-  final int decimalPlaces; // Novo parâmetro
+  final int decimalPlaces;
+  final int digitsPerRow;
+  final double squareSize;
 
   const MosaicDisplay({
     Key? key,
     required this.result,
     required this.digitColors,
     required this.decimalPlaces,
+    required this.digitsPerRow,
+    required this.squareSize,
   }) : super(key: key);
 
   @override
+  _MosaicDisplayState createState() => _MosaicDisplayState();
+}
+
+class _MosaicDisplayState extends State<MosaicDisplay> {
+  @override
   Widget build(BuildContext context) {
-    return _buildMosaic(result);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double availableHeight = constraints.maxHeight;
+
+        // Número fixo de linhas que queremos manter
+        int numRows = 14;
+
+        // Calcula quantos quadrados (em altura) cabem na área disponível
+        int maxRows = (availableHeight / widget.squareSize).floor();
+
+        // Ajusta o número de linhas se necessário para não exceder a altura disponível
+        if (maxRows < numRows) {
+          numRows = maxRows;
+        }
+
+        // Calcula o número total de dígitos que cabem no mosaico
+        int maxDigits = widget.digitsPerRow * numRows;
+
+        return _buildMosaic(widget.result, maxDigits, numRows);
+      },
+    );
   }
 
-  Widget _buildMosaic(String result) {
+  Widget _buildMosaic(String result, int maxDigits, int numRows) {
     if (result.contains('.')) {
       String decimalPart = result.split('.')[1];
 
-      // Limitar a parte decimal ao número especificado de casas decimais
-      if (decimalPart.length > decimalPlaces) {
-        decimalPart = decimalPart.substring(0, decimalPlaces);
+      // Limitar a parte decimal ao número máximo de dígitos que cabem no mosaico
+      if (decimalPart.length > maxDigits) {
+        decimalPart = decimalPart.substring(0, maxDigits);
       }
 
       // Quebrar a parte decimal em grupos para o mosaico
-      int digitsPerRow = 18; // Ajuste conforme necessário
       List<List<String>> decimalGroups = [];
-      for (var i = 0; i < decimalPart.length; i += digitsPerRow) {
-        int endIndex = i + digitsPerRow;
+      for (var i = 0; i < decimalPart.length; i += widget.digitsPerRow) {
+        int endIndex = i + widget.digitsPerRow;
         if (endIndex > decimalPart.length) {
           endIndex = decimalPart.length;
         }
@@ -39,14 +67,15 @@ class MosaicDisplay extends StatelessWidget {
 
       // Criar as linhas do mosaico
       List<Widget> mosaicRows = decimalGroups
-          .map((group) => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+          .map((group) =>
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: group
                     .map((digit) => Container(
-                          width: 20,
-                          height: 20,
+                          width: widget.squareSize,
+                          height: widget.squareSize,
                           decoration: BoxDecoration(
-                            color: digitColors[digit],
+                            color: widget.digitColors[digit],
                             border: Border.all(color: Colors.black, width: 1),
                           ),
                         ))
@@ -54,10 +83,17 @@ class MosaicDisplay extends StatelessWidget {
               ))
           .toList();
 
-      // Retorna um Column com as linhas do mosaico
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: mosaicRows,
+      // Garantir que não excedamos o número de linhas calculado
+      if (mosaicRows.length > numRows) {
+        mosaicRows = mosaicRows.sublist(0, numRows);
+      }
+
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: mosaicRows,
+        ),
       );
     } else {
       return Container();

@@ -10,14 +10,14 @@ class ResultDisplay extends StatelessWidget {
     return Container(
     decoration: BoxDecoration(
     color: Colors.black87,
-    borderRadius: BorderRadius.circular(10.0),
+    borderRadius: BorderRadius.circular(7.0),
   ),
       alignment: Alignment.bottomRight,
-      padding: const EdgeInsets.all(9),
+      padding: const EdgeInsets.all(5),
       child: Text(
         display,
         style: const TextStyle(
-          fontSize: 25,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),

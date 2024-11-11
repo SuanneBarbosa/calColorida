@@ -1,7 +1,12 @@
 // import 'dart:math';
+import 'package:calcolorida_app/constants/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:decimal/decimal.dart'; // Certifique-se de usar a versão 3.0.2
+// import 'package:just_audio/just_audio.dart';
 
+import 'package:decimal/decimal.dart'; // Certifique-se de usar a versão 3.0.2
+import 'package:calcolorida_app/controllers/audio_controller.dart';
+
+// import 'package:calcolorida_app/constants/constants.dart'; // Importar digitToNote
 class CalculatorController {
   String _display = '0';
   String _currentNumber = '';
@@ -9,8 +14,9 @@ class CalculatorController {
   Decimal _result = Decimal.zero; // Usando Decimal para maior precisão
   bool _hasDecimal = false;
   String _expression = '';
-  int _decimalPlaces = 270; // Número padrão de casas decimais
-  int _maxDecimalPlaces = 270; // Máximo de casas decimais permitidas
+  int _decimalPlaces = 750; // Número padrão de casas decimais
+  int _maxDecimalPlaces = 750; // Máximo de casas decimais permitidas
+  bool _isResultDisplayed = false; 
 
   // Getters para o display e a expressão atual
   String get display => _display;
@@ -32,7 +38,6 @@ class CalculatorController {
 
   // Função para processar teclas pressionadas
   void processKey(String key) {
-    // Limpa a calculadora se um novo número for pressionado após um resultado
     if (_operation.isEmpty &&
         _display == _result.toString() &&
         (key != 'C' &&
@@ -41,8 +46,8 @@ class CalculatorController {
                 .contains(key))) {
       _clear();
     }
-
     if (key == 'C') {
+      stopMelody();
       _clear();
     } else if (key == '=') {
       _calculate();
@@ -50,6 +55,7 @@ class CalculatorController {
       _setOperation(key);
       _expression += ' $key ';
     } else if (key == '.') {
+      _isResultDisplayed = false; // Redefine o flag
       _addDecimal();
       _expression += key;
     } else if (key == '√') {
@@ -65,8 +71,8 @@ class CalculatorController {
       _calculateFactorial();
       _expression += '!';
     } else if (key == '<-') {
-      if (_currentNumber.isEmpty) {
-        // Ignora o backspace se não houver número atual
+      if (_isResultDisplayed) {
+      } else if (_currentNumber.isEmpty) {
       } else {
         _backspace();
         if (_expression.isNotEmpty) {
@@ -75,6 +81,7 @@ class CalculatorController {
       }
     } else {
       // Adiciona um dígito ao número atual
+      _isResultDisplayed = false; // Redefine o flag
       if (_operation.isEmpty) {
         _currentNumber += key;
       } else {
@@ -82,6 +89,7 @@ class CalculatorController {
       }
       _expression += key;
     }
+    // _isResultDisplayed = true; // Marca que o resultado está na tela
     _updateDisplay();
   }
 
@@ -93,13 +101,14 @@ class CalculatorController {
     _hasDecimal = false;
     _expression = '';
     _display = '0';
+    _isResultDisplayed = false; // Redefine o flag
   }
 
   // Função para calcular o resultado com base na operação atual
   void _calculate() {
     if (_operation.isEmpty) return;
-    Decimal secondNumber = Decimal.parse(_currentNumber); // Converte para Decimal
-    
+    Decimal secondNumber =
+        Decimal.parse(_currentNumber); // Converte para Decimal
 
     switch (_operation) {
       case '+':
@@ -113,7 +122,8 @@ class CalculatorController {
         break;
       case '/':
         if (secondNumber != Decimal.zero) {
-          _result = (_result / secondNumber).toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
+          _result = (_result / secondNumber)
+              .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
         } else {
           _display = 'Erro: Divisão por zero';
           return;
@@ -123,16 +133,51 @@ class CalculatorController {
         _result = _powDecimal(_result, int.parse(secondNumber.toString()));
         break;
     }
-
-    // Formata o resultado com o número desejado de casas decimais
     _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-    _operation = ''; // Limpa a operação atual
-    _expression = ''; // Limpa a expressão
-    _updateDisplay(); // Atualiza o display
+    _operation = '';
+    _expression = '';
+    _isResultDisplayed = true; 
+    _updateDisplay();
+  }
+
+  
+  
+  bool _shouldStop = false;
+
+  Future<void> playMelody() async {
+    if (!_isResultDisplayed) {
+    print("O áudio só pode tocar após o resultado ser exibido.");
+    return;
+  }
+  _shouldStop = false;
+  if (_currentNumber.isNotEmpty && _currentNumber.contains('.')) {
+    List<String> parts = _currentNumber.split('.');
+    String decimalPart = parts[1];
+    decimalPart = decimalPart.replaceAll(RegExp(r'0+$'), '');
+
+    for (int i = 0; i < decimalPart.length; i++) {
+      if (_shouldStop) break;
+      String char = decimalPart[i];
+      if (RegExp(r'[0-9]').hasMatch(char)) {
+        int digit = int.parse(char);
+        print('Tocando nota para o dígito $digit: ${digitToNote[digit]}');
+        await playNoteForNumber(digit); 
+        if (_shouldStop) break; 
+        // await Future.delayed(Duration(milliseconds: 200)); // Intervalo entre notas
+      }
+    }
+  }
+  await stopAudio();
+}
+
+  Future<void> stopMelody() async {
+    _shouldStop = true; // Definir o flag para interromper a reprodução
+    await stopAudio(); // Parar qualquer nota que esteja tocando
   }
 
   // Função para definir a operação matemática
   void _setOperation(String op) {
+    _isResultDisplayed = false; // Redefine o flag
     if (_currentNumber.isNotEmpty) {
       if (_operation.isNotEmpty) {
         _calculate();
@@ -204,72 +249,76 @@ class CalculatorController {
 
   // Função para calcular a raiz quadrada
   void _calculateSqrt() {
-  if (_currentNumber.isNotEmpty) {
-    try {
-      Decimal number = Decimal.parse(_currentNumber);
+    if (_currentNumber.isNotEmpty) {
+      try {
+        Decimal number = Decimal.parse(_currentNumber);
 
-      // Verificar se o número é negativo
-      if (number < Decimal.zero) {
-        _display = 'Erro: Número negativo';
-        return;
+        // Verificar se o número é negativo
+        if (number < Decimal.zero) {
+          _display = 'Erro: Número negativo';
+          return;
+        }
+
+        // Calcular a raiz quadrada usando o método de Newton-Raphson
+        Decimal sqrtResult = _sqrtNewtonRaphson(number, _decimalPlaces);
+
+        _result = sqrtResult;
+
+        // Atualizar o display
+        _currentNumber = _result.toStringAsFixed(_decimalPlaces);
+        _isResultDisplayed = true; // Define o flag como verdadeiro
+        _updateDisplay();
+      } catch (e) {
+        _display = 'Erro';
+      }
+    }
+  }
+
+  Decimal _sqrtNewtonRaphson(Decimal value, int decimalPlaces) {
+    if (value < Decimal.zero) {
+      throw ArgumentError('Cannot compute square root of a negative number');
+    } else if (value == Decimal.zero) {
+      return Decimal.zero;
+    }
+
+    Decimal two = Decimal.fromInt(2);
+    Decimal guess =
+        (value / two).toDecimal(scaleOnInfinitePrecision: decimalPlaces);
+    Decimal lastGuess;
+
+    int maxIterations = 750;
+    int iteration = 0;
+
+    while (true) {
+      lastGuess = guess;
+      guess = ((guess +
+                  (value / guess)
+                      .toDecimal(scaleOnInfinitePrecision: decimalPlaces)) /
+              two)
+          .toDecimal(scaleOnInfinitePrecision: decimalPlaces);
+
+      iteration++;
+      if (iteration > maxIterations) {
+        break;
       }
 
-      // Calcular a raiz quadrada usando o método de Newton-Raphson
-      Decimal sqrtResult = _sqrtNewtonRaphson(number, _decimalPlaces);
-
-      _result = sqrtResult;
-
-      // Atualizar o display
-      _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-      _updateDisplay();
-    } catch (e) {
-      _display = 'Erro';
-    }
-  }
-}
-
-Decimal _sqrtNewtonRaphson(Decimal value, int decimalPlaces) {
-  if (value < Decimal.zero) {
-    throw ArgumentError('Cannot compute square root of a negative number');
-  } else if (value == Decimal.zero) {
-    return Decimal.zero;
-  }
-
-  Decimal two = Decimal.fromInt(2);
-  Decimal guess = (value / two).toDecimal(scaleOnInfinitePrecision: decimalPlaces);
-  Decimal lastGuess;
-
-  int maxIterations = 270;
-  int iteration = 0;
-
-  while (true) {
-    lastGuess = guess;
-    guess = ((guess + (value / guess).toDecimal(scaleOnInfinitePrecision: decimalPlaces)) / two)
-        .toDecimal(scaleOnInfinitePrecision: decimalPlaces);
-
-    iteration++;
-    if (iteration > maxIterations) {
-      break;
+      // Verificar se a diferença entre as suposições é menor que a precisão desejada
+      Decimal difference = (guess - lastGuess).abs();
+      Decimal epsilon = Decimal.parse('1e-${decimalPlaces + 1}');
+      if (difference < epsilon) {
+        break;
+      }
     }
 
-    // Verificar se a diferença entre as suposições é menor que a precisão desejada
-    Decimal difference = (guess - lastGuess).abs();
-    Decimal epsilon = Decimal.parse('1e-${decimalPlaces + 1}');
-    if (difference < epsilon) {
-      break;
-    }
+    // Arredondar o resultado para o número de casas decimais desejado
+    return Decimal.parse(guess.toStringAsFixed(decimalPlaces));
   }
-
-  // Arredondar o resultado para o número de casas decimais desejado
-  return Decimal.parse(guess.toStringAsFixed(decimalPlaces));
-}
-
 
   // Função para inserir o valor de Pi
   void _insertPi() {
     // Definindo Pi com alta precisão
-    final Decimal piDecimal = Decimal.parse(
-        '3.14159265358979323846264338327950288419716939937510');
+    final Decimal piDecimal =
+        Decimal.parse('3.14159265358979323846264338327950288419716939937510582097494459230');
 
     if (_currentNumber.isEmpty) {
       _currentNumber = piDecimal.toStringAsFixed(_decimalPlaces);
@@ -280,62 +329,63 @@ Decimal _sqrtNewtonRaphson(Decimal value, int decimalPlaces) {
 
   // Função para calcular o inverso (1/x)
   void _calculateInverse() {
-  if (_currentNumber.isNotEmpty) {
-    try {
-      Decimal number = Decimal.parse(_currentNumber);
-      if (number != Decimal.zero) {
-        _result = (Decimal.one / number).toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
-        _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-        _updateDisplay();
-      } else {
-        _display = 'Erro: Divisão por zero';
+    if (_currentNumber.isNotEmpty) {
+      try {
+        Decimal number = Decimal.parse(_currentNumber);
+        if (number != Decimal.zero) {
+          _result = (Decimal.one / number)
+              .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
+          _currentNumber = _result.toStringAsFixed(_decimalPlaces);
+          _isResultDisplayed = true; // Define o flag como verdadeiro
+          _updateDisplay();
+        } else {
+          _display = 'Erro: Divisão por zero';
+        }
+      } catch (e) {
+        _display = 'Erro';
       }
-    } catch (e) {
-      _display = 'Erro';
     }
   }
-}
 
-  // Função para calcular o fatorial
   void _calculateFactorial() {
-  if (_currentNumber.isNotEmpty) {
-    try {
-      Decimal numberDecimal = Decimal.parse(_currentNumber);
-      
-      // Verificar se o número é inteiro
-      if ((numberDecimal % Decimal.one) != Decimal.zero) {
-        _display = 'Erro: Entrada não é um inteiro';
-        return;
+    if (_currentNumber.isNotEmpty) {
+      try {
+        Decimal numberDecimal = Decimal.parse(_currentNumber);
+
+        // Verificar se o número é inteiro
+        if ((numberDecimal % Decimal.one) != Decimal.zero) {
+          _display = 'Erro: Entrada não é um inteiro';
+          return;
+        }
+
+        // Converter para BigInt
+        BigInt number = numberDecimal.toBigInt();
+
+        // Verificar se o número é não negativo
+        if (number >= BigInt.zero) {
+          BigInt factorialResult = _factorial(number);
+          _result = Decimal.fromBigInt(factorialResult);
+          _currentNumber = _result.toString(); // Fatorial é inteiro
+          _isResultDisplayed = true; // Define o flag como verdadeiro
+          _updateDisplay();
+        } else {
+          _display = 'Erro: Número negativo';
+        }
+      } catch (e) {
+        _display = 'Erro: Entrada inválida';
       }
-      
-      // Converter para BigInt
-      BigInt number = numberDecimal.toBigInt();
-      
-      // Verificar se o número é não negativo
-      if (number >= BigInt.zero) {
-        BigInt factorialResult = _factorial(number);
-        _result = Decimal.fromBigInt(factorialResult);
-        _currentNumber = _result.toString(); // Fatorial é inteiro
-        _updateDisplay();
-      } else {
-        _display = 'Erro: Número negativo';
-      }
-    } catch (e) {
-      _display = 'Erro: Entrada inválida';
     }
   }
-}
 
-  // Método recursivo para calcular o fatorial usando BigInt
+  // Método para calcular o fatorial usando BigInt
   BigInt _factorial(BigInt n) {
-  if (n < BigInt.zero) throw ArgumentError('Número negativo não permitido');
-  BigInt result = BigInt.one;
-  for (BigInt i = BigInt.one; i <= n; i = i + BigInt.one) {
-    result *= i;
+    if (n < BigInt.zero) throw ArgumentError('Número negativo não permitido');
+    BigInt result = BigInt.one;
+    for (BigInt i = BigInt.one; i <= n; i = i + BigInt.one) {
+      result *= i;
+    }
+    return result;
   }
-  return result;
-}
-
 
   // Função para remover o último dígito inserido
   void _backspace() {
@@ -349,8 +399,9 @@ Decimal _sqrtNewtonRaphson(Decimal value, int decimalPlaces) {
   }
 
   // Função para calcular a potência de um Decimal elevado a um expoente inteiro
- Decimal _powDecimal(Decimal base, int exponent) {
-  return base.pow(exponent).toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
-}
-
+  Decimal _powDecimal(Decimal base, int exponent) {
+    return base
+        .pow(exponent)
+        .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
+  }
 }

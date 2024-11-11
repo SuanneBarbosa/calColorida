@@ -10,7 +10,7 @@ class CalculatorKeypad extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.count(
       crossAxisCount: 4,
-      childAspectRatio: 2, 
+      childAspectRatio: 2.3, 
       mainAxisSpacing: 4,  
       crossAxisSpacing: 4,
       children: [
