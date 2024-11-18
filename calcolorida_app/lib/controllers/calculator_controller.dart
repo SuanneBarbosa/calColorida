@@ -1,5 +1,5 @@
 // import 'dart:math';
-import 'package:calcolorida_app/constants/constants.dart';
+// import 'package:calcolorida_app/constants/constants.dart';
 import 'package:flutter/material.dart';
 // import 'package:just_audio/just_audio.dart';
 
@@ -142,33 +142,38 @@ class CalculatorController {
 
   
   
+  // ignore: unused_field
   bool _shouldStop = false;
 
-  Future<void> playMelody() async {
-    if (!_isResultDisplayed) {
+  // calculator_controller.dart
+
+Future<void> playMelody({int durationMs = 500}) async {
+  if (!_isResultDisplayed) {
     print("O áudio só pode tocar após o resultado ser exibido.");
     return;
   }
+
   _shouldStop = false;
+
   if (_currentNumber.isNotEmpty && _currentNumber.contains('.')) {
     List<String> parts = _currentNumber.split('.');
     String decimalPart = parts[1];
     decimalPart = decimalPart.replaceAll(RegExp(r'0+$'), '');
 
-    for (int i = 0; i < decimalPart.length; i++) {
-      if (_shouldStop) break;
-      String char = decimalPart[i];
+    // Converter a parte decimal em uma lista de dígitos inteiros
+    List<int> digits = decimalPart.split('').map((char) {
       if (RegExp(r'[0-9]').hasMatch(char)) {
-        int digit = int.parse(char);
-        print('Tocando nota para o dígito $digit: ${digitToNote[digit]}');
-        await playNoteForNumber(digit); 
-        if (_shouldStop) break; 
-        // await Future.delayed(Duration(milliseconds: 200)); // Intervalo entre notas
+        return int.parse(char);
+      } else {
+        return null;
       }
-    }
+    }).whereType<int>().toList();
+
+    // Reproduzir a melodia com duração de 3000ms por nota
+    await playMelodyAudio(digits, durationMs: durationMs);
   }
-  await stopAudio();
 }
+
 
   Future<void> stopMelody() async {
     _shouldStop = true; // Definir o flag para interromper a reprodução

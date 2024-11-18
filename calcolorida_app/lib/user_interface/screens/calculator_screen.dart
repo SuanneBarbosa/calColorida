@@ -1,10 +1,10 @@
+import 'package:calcolorida_app/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
 // import 'package:just_audio/just_audio.dart';
 import '../../controllers/calculator_controller.dart';
 import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
-import 'package:calcolorida_app/controllers/audio_controller.dart'; // Importar stopAudio
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({Key? key}) : super(key: key);
@@ -22,6 +22,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final double _maxSquareSize = 50.0;
   bool _colorLegendExpanded = false;
 
+  int _noteDurationMs = 500; // Valor inicial de 3000ms
+
   final Map<String, Color> digitColors = {
     '0': Colors.red,
     '1': Colors.green,
@@ -35,17 +37,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     '9': Colors.cyan,
   };
 
-  @override
-  void initState() {
-    super.initState();
-    // preloadAudio();
-  }
+ @override
+void initState() {
+  super.initState();
+  initializeAudio();
+}
 
   @override
-  void dispose() {
-    // disposeAudio(); // Chame a função para liberar o player
-    super.dispose();
-  }
+void dispose() {
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -256,16 +257,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               children: [
                 FloatingActionButton(
                   onPressed: () {
-                    _controller.playMelody();
+                    _controller.playMelody(durationMs: _noteDurationMs);
                   },
                   child: Icon(Icons.play_arrow),
                 ),
                 SizedBox(width: 16),
                 FloatingActionButton(
                   onPressed: () {
-                    stopAudio();
+                    _controller.stopMelody();
                   },
                   child: Icon(Icons.stop),
+                ),
+              ],
+            ),
+          ),
+          // Controle de duração da nota
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Text('Duração da Nota (ms): $_noteDurationMs'),
+                Text('Velocidade:'),
+                Slider(
+                  value: _noteDurationMs.toDouble(),
+                  min: 100,
+                  max: 3000, // Ajuste conforme necessário
+                  label: '$_noteDurationMs ms',
+                  onChanged: (value) {
+                    setState(() {
+                      _noteDurationMs = value.toInt();
+                    });
+                  },
                 ),
               ],
             ),
