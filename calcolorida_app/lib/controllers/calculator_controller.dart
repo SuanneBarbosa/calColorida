@@ -1,12 +1,8 @@
-// import 'dart:math';
-// import 'package:calcolorida_app/constants/constants.dart';
 import 'package:flutter/material.dart';
-// import 'package:just_audio/just_audio.dart';
-
-import 'package:decimal/decimal.dart'; // Certifique-se de usar a versão 3.0.2
+import 'package:decimal/decimal.dart';
 import 'package:calcolorida_app/controllers/audio_controller.dart';
+import 'package:calcolorida_app/models/mosaic_model.dart';
 
-// import 'package:calcolorida_app/constants/constants.dart'; // Importar digitToNote
 class CalculatorController {
   String _display = '0';
   String _currentNumber = '';
@@ -14,9 +10,11 @@ class CalculatorController {
   Decimal _result = Decimal.zero; // Usando Decimal para maior precisão
   bool _hasDecimal = false;
   String _expression = '';
-  int _decimalPlaces = 750; // Número padrão de casas decimais
-  int _maxDecimalPlaces = 750; // Máximo de casas decimais permitidas
+  int _decimalPlaces = 400; // Número padrão de casas decimais
+  int _maxDecimalPlaces = 400; // Máximo de casas decimais permitidas
   bool _isResultDisplayed = false; 
+
+  List<MosaicModel> savedMosaics = [];
 
   // Getters para o display e a expressão atual
   String get display => _display;
@@ -38,60 +36,61 @@ class CalculatorController {
 
   // Função para processar teclas pressionadas
   void processKey(String key) {
-    if (_operation.isEmpty &&
-        _display == _result.toString() &&
-        (key != 'C' &&
-            key != '=' &&
-            !['+', '-', 'x', '/', '^', '√', 'π', '1/x', '!', '<-', 'S']
-                .contains(key))) {
-      _clear();
+  if (key == 'save') {
+    if (_isResultDisplayed) {
+      saveMosaic(_expression.trim(), _display);
     }
-    if (key == 'C') {
-      stopMelody();
-      _clear();
-    } else if (key == '=') {
-      _calculate();
-    } else if (['+', '-', 'x', '/', '^'].contains(key)) {
-      _setOperation(key);
-      _expression += ' $key ';
-    } else if (key == '.') {
-      _isResultDisplayed = false; // Redefine o flag
-      _addDecimal();
-      _expression += key;
-    } else if (key == '√') {
-      _calculateSqrt();
-      _expression = '√($_expression)';
-    } else if (key == 'π') {
-      _insertPi();
-      _expression += 'π';
-    } else if (key == '1/x') {
-      _calculateInverse();
-      _expression = '1/($_expression)';
-    } else if (key == '!') {
-      _calculateFactorial();
-      _expression += '!';
-    } else if (key == '<-') {
-      if (_isResultDisplayed) {
-      } else if (_currentNumber.isEmpty) {
-      } else {
-        _backspace();
-        if (_expression.isNotEmpty) {
-          _expression = _expression.substring(0, _expression.length - 1);
-        }
-      }
-    } else {
-      // Adiciona um dígito ao número atual
-      _isResultDisplayed = false; // Redefine o flag
-      if (_operation.isEmpty) {
-        _currentNumber += key;
-      } else {
-        _currentNumber += key;
-      }
-      _expression += key;
-    }
-    // _isResultDisplayed = true; // Marca que o resultado está na tela
-    _updateDisplay();
+    return;
   }
+  if (_operation.isEmpty &&
+      _display == _result.toString() &&
+      (key != 'C' &&
+          key != '=' &&
+          !['+', '-', 'x', '/', '^', '√', 'π', '1/x', '!', '<-', 'S']
+              .contains(key))) {
+    _clear();
+  }
+  if (key == 'C') {
+    stopMelody();
+    _clear();
+  } else if (key == '=') {
+    _calculate();
+  } else if (['+', '-', 'x', '/', '^'].contains(key)) {
+    _setOperation(key);
+    _expression += ' $key ';
+  } else if (key == '.') {
+    _isResultDisplayed = false; // Redefine o flag
+    _addDecimal();
+    _expression += key;
+  } else if (key == '√') {
+    _calculateSqrt();
+    _expression = '√(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
+  } else if (key == 'π') {
+    _insertPi();
+    _expression += 'π';
+  } else if (key == '1/x') {
+    _calculateInverse();
+    _expression = '1/(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
+  } else if (key == '!') {
+    _calculateFactorial();
+    _expression = '(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})!';
+  } else if (key == '<-') {
+    if (_isResultDisplayed) {
+    } else if (_currentNumber.isEmpty) {
+    } else {
+      _backspace();
+      if (_expression.isNotEmpty) {
+        _expression = _expression.substring(0, _expression.length - 1);
+      }
+    }
+  } else {
+    // Adiciona um dígito ao número atual
+    _isResultDisplayed = false; // Redefine o flag
+    _currentNumber += key;
+    _expression += key;
+  }
+  _updateDisplay();
+}
 
   // Função para limpar a calculadora
   void _clear() {
@@ -135,7 +134,7 @@ class CalculatorController {
     }
     _currentNumber = _result.toStringAsFixed(_decimalPlaces);
     _operation = '';
-    _expression = '';
+    // _expression = '';
     _isResultDisplayed = true; 
     _updateDisplay();
   }
@@ -147,7 +146,12 @@ class CalculatorController {
 
   // calculator_controller.dart
 
-Future<void> playMelody({int durationMs = 500}) async {
+Future<void> playMelody({
+  int durationMs = 500,
+  int? maxDigits, // Adicione este parâmetro
+  Function(int noteIndex)? onNoteStarted,
+  Function(int noteIndex)? onNoteFinished,
+}) async {
   if (!_isResultDisplayed) {
     print("O áudio só pode tocar após o resultado ser exibido.");
     return;
@@ -157,28 +161,39 @@ Future<void> playMelody({int durationMs = 500}) async {
 
   if (_currentNumber.isNotEmpty && _currentNumber.contains('.')) {
     List<String> parts = _currentNumber.split('.');
-    String decimalPart = parts[1];
-    decimalPart = decimalPart.replaceAll(RegExp(r'0+$'), '');
+    String decimalPart = parts[1].replaceAll(RegExp(r'0+$'), '');
 
-    // Converter a parte decimal em uma lista de dígitos inteiros
-    List<int> digits = decimalPart.split('').map((char) {
-      if (RegExp(r'[0-9]').hasMatch(char)) {
-        return int.parse(char);
-      } else {
-        return null;
-      }
-    }).whereType<int>().toList();
+    // Limitar ao maxDigits se especificado
+    if (maxDigits != null && decimalPart.length > maxDigits) {
+      decimalPart = decimalPart.substring(0, maxDigits);
+    }
 
-    // Reproduzir a melodia com duração de 3000ms por nota
-    await playMelodyAudio(digits, durationMs: durationMs);
+    List<int> digits = decimalPart.split('').map(int.parse).toList();
+
+    if (digits.isEmpty) {
+      print("Nenhum dígito para reproduzir após o ponto decimal.");
+      return;
+    }
+
+    try {
+      await playMelodyAudio(
+        digits: digits,
+        durationMs: durationMs,
+        onNoteStarted: onNoteStarted,
+        onNoteFinished: onNoteFinished,
+      );
+    } catch (e) {
+      print("Erro ao reproduzir melodia: $e");
+    }
   }
 }
 
 
+
   Future<void> stopMelody() async {
-    _shouldStop = true; // Definir o flag para interromper a reprodução
-    await stopAudio(); // Parar qualquer nota que esteja tocando
-  }
+  stopPlayback(); // Chama a função em audio_controller.dart para parar a reprodução
+  await stopAudio(); // Chama a função em audio_controller.dart para parar o áudio
+}
 
   // Função para definir a operação matemática
   void _setOperation(String op) {
@@ -291,7 +306,7 @@ Future<void> playMelody({int durationMs = 500}) async {
         (value / two).toDecimal(scaleOnInfinitePrecision: decimalPlaces);
     Decimal lastGuess;
 
-    int maxIterations = 750;
+    int maxIterations = 400;
     int iteration = 0;
 
     while (true) {
@@ -403,10 +418,21 @@ Future<void> playMelody({int durationMs = 500}) async {
     _updateDisplay();
   }
 
+
   // Função para calcular a potência de um Decimal elevado a um expoente inteiro
   Decimal _powDecimal(Decimal base, int exponent) {
     return base
         .pow(exponent)
         .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
+  }
+
+   void saveMosaic(String operation, String result) {
+    savedMosaics.add(MosaicModel(operation: operation, result: result));
+  }
+
+  void deleteMosaic(int index) {
+    if (index >= 0 && index < savedMosaics.length) {
+      savedMosaics.removeAt(index);
+    }
   }
 }

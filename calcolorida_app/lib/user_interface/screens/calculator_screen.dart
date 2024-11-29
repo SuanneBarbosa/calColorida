@@ -1,7 +1,7 @@
 import 'package:calcolorida_app/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
-// import 'package:just_audio/just_audio.dart';
 import '../../controllers/calculator_controller.dart';
+import '../screens/saved_mosaics_screen.dart';
 import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
@@ -15,14 +15,16 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final CalculatorController _controller = CalculatorController();
-  int _mosaicDecimalPlaces = 750; // Valor padrão
-  int _mosaicDigitsPerRow = 19; // Valor padrão
-  double _squareSize = 20.0; // Tamanho inicial dos quadrados
+  int _mosaicDecimalPlaces = 400;
+  int _mosaicDigitsPerRow = 19;
+  double _squareSize = 20.0;
   final double _minSquareSize = 10.0;
   final double _maxSquareSize = 50.0;
   bool _colorLegendExpanded = false;
-
-  int _noteDurationMs = 500; // Valor inicial de 3000ms
+  int _noteDurationMs = 500;
+  int? _currentNoteIndex; // Índice da nota atual sendo tocada
+  bool _isPlaying = false; // Indica se está tocando ou não
+  int _maxDigitsInMosaic = 0; // Adicione esta variável
 
   final Map<String, Color> digitColors = {
     '0': Colors.red,
@@ -37,29 +39,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     '9': Colors.cyan,
   };
 
- @override
-void initState() {
-  super.initState();
-  initializeAudio();
-}
+  @override
+  void initState() {
+    super.initState();
+    initializeAudio();
+  }
 
   @override
-void dispose() {
-  super.dispose();
-}
+  void dispose() {
+    disposeAudio(); // Adicione esta linha para liberar o player de áudio
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // title: const Text('Musical Colorida'),
         actions: [
-          // IconButton(
-          //   icon: Icon(Icons.menu),
-          //   onPressed: () {
-          //     _openMenu();
-          //   },
-          // ),
           GestureDetector(
             onTap: () {
               setState(() {
@@ -82,37 +78,17 @@ void dispose() {
                         : Icons.palette_outlined,
                     color: Colors.blue,
                   ),
-                  // SizedBox(width: 4.0),
-                  // Text('Cores')
                 ],
               ),
             ),
           ),
         ],
       ),
-      // floatingActionButton: Row(
-      //   mainAxisAlignment: MainAxisAlignment.end,
-      //   children: [
-      //     FloatingActionButton(
-      //       onPressed: () {
-      //         _controller.playMelody(); // Chamar playMelody() ao clicar em Play
-      //       },
-      //       child: Icon(Icons.play_arrow),
-      //     ),
-      //     SizedBox(width: 16),
-      //     FloatingActionButton(
-      //       onPressed: () {
-      //         stopAudio(); // Chamar stopAudio() ao clicar em Stop
-      //       },
-      //       child: Icon(Icons.stop),
-      //     ),
-      //   ],
-      // ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
+            const DrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
@@ -125,11 +101,9 @@ void dispose() {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Configurações'),
-              onTap: () {
-                // Ação para configurações
-              },
+              // leading: Icon(Icons.settings),
+              title: Text('Menu'),
+              onTap: () {},
             ),
             ListTile(
               leading: Icon(Icons.zoom_in),
@@ -146,11 +120,32 @@ void dispose() {
                 },
               ),
             ),
+            // Controle de Velocidade no Menu Lateral
             ListTile(
-              leading: Icon(Icons.info),
-              title: Text('Sobre'),
+              leading: Icon(Icons.speed),
+              title: Text('Velocidade de Reprodução'),
+              subtitle: Slider(
+                value: (3000 - _noteDurationMs).toDouble(),
+                min: 0,
+                max: 2900,
+                divisions: 29,
+                onChanged: (value) {
+                  setState(() {
+                    _noteDurationMs = 3000 - value.toInt();
+                  });
+                },
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.list),
+              title: Text('Mosaicos Salvos'),
               onTap: () {
-                // Ação para sobre
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        SavedMosaicsScreen(controller: _controller),
+                  ),
+                );
               },
             ),
           ],
@@ -177,7 +172,7 @@ void dispose() {
                     child: Center(
                       child: Text(
                         entry.key,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -202,37 +197,31 @@ void dispose() {
                 decimalPlaces: _mosaicDecimalPlaces,
                 digitsPerRow: _mosaicDigitsPerRow,
                 squareSize: _squareSize,
+                currentNoteIndex: _currentNoteIndex, // Passe o índice atual
+                onMaxDigitsCalculated: (maxDigits) {
+                  setState(() {
+                    _maxDigitsInMosaic = maxDigits;
+                  });
+                },
+                onNoteTap: (index) {
+                  // Callback para toque na nota
+                  // Lógica para reproduzir a nota individual
+                },
               ),
             ),
           ),
-          // Slider para ajustar o zoom (tamanho dos quadrados)
-          // Padding(
-          //   padding: EdgeInsets.symmetric(horizontal: 16.0),
-          //   child: Row(
-          //     children: [
-          //       Text('Zoom:'),
-          //       Expanded(
-          //         child: Slider(
-          //           value: _squareSize,
-          //           min: _minSquareSize,
-          //           max: _maxSquareSize,
-          //           label: _squareSize.toStringAsFixed(1),
-          //           onChanged: (double value) {
-          //             setState(() {
-          //               _squareSize = value;
-          //             });
-          //           },
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          // Slider para dígitos por linha
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
-               Text('Padrões: ${_mosaicDigitsPerRow}'), // Exibe a contagem de colunas
+                Text(
+                  '${_mosaicDigitsPerRow}', // Exibe a contagem de colunas
+                  style: TextStyle(
+                    color: Colors.blue, // Define a cor do texto
+                    fontWeight: FontWeight.bold, // Torna o texto em negrito
+                    fontSize: 30, // Ajusta o tamanho do texto
+                  ),
+                ),
                 Expanded(
                   child: Slider(
                     value: _mosaicDigitsPerRow.toDouble(),
@@ -249,55 +238,61 @@ void dispose() {
               ],
             ),
           ),
-           // Área para controles de áudio
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    _controller.playMelody(durationMs: _noteDurationMs);
-                  },
-                  child: Icon(Icons.play_arrow),
+          // Área para controles de áudio
+          // Padding(
+          //   // padding:
+          //   //     const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    if (_isPlaying) {
+                      // Parar a reprodução
+                      _controller.stopMelody();
+                      _isPlaying = false; // Atualiza para "Stop"
+                    } else {
+                      // Iniciar a reprodução
+                      _controller.playMelody(
+                        durationMs: _noteDurationMs,
+                        maxDigits: _maxDigitsInMosaic,
+                        onNoteStarted: (noteIndex) {
+                          setState(() {
+                            _currentNoteIndex =
+                                noteIndex; // Atualiza o índice da nota atual
+                          });
+                        },
+                        onNoteFinished: (noteIndex) {
+                          setState(() {
+                            _currentNoteIndex =
+                                null; // Reseta o índice após a reprodução
+                            _isPlaying =
+                                false; // Reseta para "Play" quando terminar
+                          });
+                        },
+                      );
+                      _isPlaying = true; // Atualiza para "Play"
+                    }
+                  });
+                },
+                child: Icon(
+                  _isPlaying
+                      ? Icons.stop
+                      : Icons.play_arrow, // Muda o ícone dinamicamente
+                  color: _isPlaying
+                      ? Color.fromARGB(255, 84, 173, 255) // Cor do ícone "Stop"
+                      : Color.fromARGB(
+                          255, 13, 110, 253), // Cor do ícone "Play"
                 ),
-                SizedBox(width: 16),
-                FloatingActionButton(
-                  onPressed: () {
-                    _controller.stopMelody();
-                  },
-                  child: Icon(Icons.stop),
-                ),
-              ],
-            ),
-          ),
-          // Controle de duração da nota
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Text('Duração da Nota (ms): $_noteDurationMs'),
-                Text('Velocidade:'),
-                Slider(
-                  value: _noteDurationMs.toDouble(),
-                  min: 100,
-                  max: 3000, // Ajuste conforme necessário
-                  label: '$_noteDurationMs ms',
-                  onChanged: (value) {
-                    setState(() {
-                      _noteDurationMs = value.toInt();
-                    });
-                  },
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           Expanded(
             flex: 4,
             child: Card(
-              margin: EdgeInsets.all(20),
-              color: Colors.grey[300],
+              margin: EdgeInsets.all(30),
+              color: Color.fromARGB(255, 84, 173, 255),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -307,13 +302,19 @@ void dispose() {
                     flex: 1,
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(12, 12, 12, 4),
-                      child: ResultDisplay(display: _controller.display),
+                      child: ResultDisplay(
+                        display: _controller.display,
+                        operation:
+                            _controller.expression, // Passe a operação atual
+                        currentNoteIndex: _currentNoteIndex,
+                        digitColors: _controller.digitColors,
+                      ),
                     ),
                   ),
                   Expanded(
                     flex: 3,
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(12, 6, 12, 1),
+                      padding: EdgeInsets.fromLTRB(15, 4, 15, 1),
                       child: CalculatorKeypad(onKeyPressed: _handleKeyPress),
                     ),
                   ),
@@ -326,24 +327,10 @@ void dispose() {
     );
   }
 
-  // void _openMenu() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         height: 200,
-  //         color: Colors.grey[200],
-  //         child: Center(
-  //           child: Text('Menu vazio'),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void _handleKeyPress(String key) {
     setState(() {
       _controller.processKey(key);
+      _currentNoteIndex = -1; // Reseta o índice ao pressionar uma tecla
     });
   }
 }
