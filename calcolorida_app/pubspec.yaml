@@ -65,7 +65,17 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/sounds/ 
+    - assets/sounds/piano/
+    - assets/sounds/baixo/
+    - assets/sounds/banjo/
+    - assets/sounds/flauta/
+    - assets/sounds/flautadoce/
+    - assets/sounds/guitarra/
+    - assets/sounds/orgao/
+    - assets/sounds/pianoeletrico/
+    - assets/sounds/sitar/
+    - assets/sounds/trompete/
+    - assets/sounds/violino/ 
     
 
   # To add assets to your application, add an assets section, like this:

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class ResultDisplay extends StatefulWidget {
   final String display;
-  final int? currentNoteIndex; // Índice da nota atual
-  final Map<String, Color> digitColors; // Mapa de cores para os dígitos
-  final String operation; // Adicionado para exibir a operação
+  final int? currentNoteIndex;
+  final Map<String, Color> digitColors;
+  final String operation;
 
   const ResultDisplay({
     Key? key,
@@ -31,7 +31,6 @@ class _ResultDisplayState extends State<ResultDisplay> {
   void didUpdateWidget(ResultDisplay oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Quando o currentNoteIndex mudar, rolar para o dígito correspondente
     if (widget.currentNoteIndex != null &&
         widget.currentNoteIndex != oldWidget.currentNoteIndex) {
       _scrollToCurrentDigit();
@@ -39,21 +38,14 @@ class _ResultDisplayState extends State<ResultDisplay> {
   }
 
   void _scrollToCurrentDigit() {
-    // Encontrar o índice onde começam os dígitos decimais
     int decimalStartIndex = widget.display.indexOf('.') + 1;
-
-    // Se não houver ponto decimal, não há dígitos decimais para destacar
     if (decimalStartIndex == 0) {
-      return; // Não faz nada se não houver parte decimal
+      return;
     }
 
-    // Calcular o índice real do dígito no display
     int actualIndex = decimalStartIndex + widget.currentNoteIndex!;
+    double offset = (actualIndex - decimalStartIndex) * 20.0;
 
-    // Calcular a posição de rolagem
-    double offset = (actualIndex - decimalStartIndex) * 20.0; // Largura de 30px por dígito
-
-    // Animar a rolagem para a posição calculada
     _scrollController.animateTo(
       offset,
       duration: const Duration(milliseconds: 300),
@@ -63,29 +55,27 @@ class _ResultDisplayState extends State<ResultDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    // Determinar altura e largura fixas para o display
     const double displayHeight = 80.0;
     const double displayWidth = double.infinity;
 
-    // Índice inicial dos números decimais
     int decimalStartIndex = widget.display.indexOf('.') + 1;
 
     return Container(
-      height: displayHeight, // Altura fixa do display
-      width: displayWidth, // Largura total disponível
-      padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),////////////////////////////
+      height: displayHeight,
+      width: displayWidth,
+      padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
       decoration: BoxDecoration(
-        color: Colors.blue[50], // Cor de fundo do display/////////////////////////////////
-        borderRadius: BorderRadius.circular(10), // Bordas arredondadas
+        color: Colors.blue[50], 
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: Colors.blue, // Borda preta
+          color: Colors.blue,
           width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             blurRadius: 4,
-            offset: Offset(2, 4), // Sombra leve
+            offset: Offset(2, 4),
           ),
         ],
       ),
@@ -93,15 +83,11 @@ class _ResultDisplayState extends State<ResultDisplay> {
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.end, // Alinha os números à direita
+          mainAxisAlignment: MainAxisAlignment.end,
           children: widget.display.split('').asMap().entries.map((entry) {
             final int index = entry.key;
             final String digit = entry.value;
-
-            // Determina se o número é decimal (após o ponto)
             bool isDecimal = decimalStartIndex > 0 && index >= decimalStartIndex;
-
-            // Verifica se este é o dígito atual destacado
             bool isCurrentDigit =
                 isDecimal && widget.currentNoteIndex != null && (index - decimalStartIndex) == widget.currentNoteIndex;
 
@@ -117,7 +103,7 @@ class _ResultDisplayState extends State<ResultDisplay> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: isDecimal ? Colors.black : Colors.black54, // Diferenciar cor de números decimais
+                  color: isDecimal ? Colors.black : Colors.black54, 
                 ),
               ),
             );

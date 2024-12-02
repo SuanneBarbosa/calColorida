@@ -22,9 +22,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final double _maxSquareSize = 50.0;
   bool _colorLegendExpanded = false;
   int _noteDurationMs = 500;
-  int? _currentNoteIndex; // Índice da nota atual sendo tocada
-  bool _isPlaying = false; // Indica se está tocando ou não
-  int _maxDigitsInMosaic = 0; // Adicione esta variável
+  int? _currentNoteIndex; 
+  bool _isPlaying = false;
+  int _maxDigitsInMosaic = 0;
 
   final Map<String, Color> digitColors = {
     '0': Colors.red,
@@ -47,7 +47,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void dispose() {
-    disposeAudio(); // Adicione esta linha para liberar o player de áudio
+    disposeAudio();
     super.dispose();
   }
 
@@ -120,7 +120,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 },
               ),
             ),
-            // Controle de Velocidade no Menu Lateral
             ListTile(
               leading: Icon(Icons.speed),
               title: Text('Velocidade de Reprodução'),
@@ -147,6 +146,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 );
               },
+            ),
+            ListTile(
+              leading: Icon(Icons.music_note),
+              title: Text('Instrumento'),
+              subtitle: DropdownButton<String>(
+                value: selectedInstrument,
+                items: instrumentFileNameMap.keys
+                    .map<DropdownMenuItem<String>>((String instrument) {
+                  return DropdownMenuItem<String>(
+                    value: instrument,
+                    child: Text(instrument),
+                  );
+                }).toList(),
+                onChanged: (String? newInstrument) {
+                  if (newInstrument != null) {
+                    setState(() {
+                      selectedInstrument = newInstrument;
+                      initializeAudio();
+                    });
+                  }
+                },
+              ),
             ),
           ],
         ),
@@ -197,15 +218,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 decimalPlaces: _mosaicDecimalPlaces,
                 digitsPerRow: _mosaicDigitsPerRow,
                 squareSize: _squareSize,
-                currentNoteIndex: _currentNoteIndex, // Passe o índice atual
+                currentNoteIndex: _currentNoteIndex,
                 onMaxDigitsCalculated: (maxDigits) {
                   setState(() {
                     _maxDigitsInMosaic = maxDigits;
                   });
                 },
                 onNoteTap: (index) {
-                  // Callback para toque na nota
-                  // Lógica para reproduzir a nota individual
                 },
               ),
             ),
@@ -215,11 +234,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: Row(
               children: [
                 Text(
-                  '${_mosaicDigitsPerRow}', // Exibe a contagem de colunas
-                  style: TextStyle(
-                    color: Colors.blue, // Define a cor do texto
-                    fontWeight: FontWeight.bold, // Torna o texto em negrito
-                    fontSize: 30, // Ajusta o tamanho do texto
+                  '${_mosaicDigitsPerRow}',
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
                   ),
                 ),
                 Expanded(
@@ -238,7 +257,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ],
             ),
           ),
-          // Área para controles de áudio
           // Padding(
           //   // padding:
           //   //     const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
@@ -249,41 +267,39 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 onPressed: () {
                   setState(() {
                     if (_isPlaying) {
-                      // Parar a reprodução
                       _controller.stopMelody();
-                      _isPlaying = false; // Atualiza para "Stop"
+                      _isPlaying = false;
                     } else {
-                      // Iniciar a reprodução
                       _controller.playMelody(
                         durationMs: _noteDurationMs,
                         maxDigits: _maxDigitsInMosaic,
                         onNoteStarted: (noteIndex) {
                           setState(() {
                             _currentNoteIndex =
-                                noteIndex; // Atualiza o índice da nota atual
+                                noteIndex;
                           });
                         },
                         onNoteFinished: (noteIndex) {
                           setState(() {
                             _currentNoteIndex =
-                                null; // Reseta o índice após a reprodução
+                                null;
                             _isPlaying =
-                                false; // Reseta para "Play" quando terminar
+                                false;
                           });
                         },
                       );
-                      _isPlaying = true; // Atualiza para "Play"
+                      _isPlaying = true;
                     }
                   });
                 },
                 child: Icon(
                   _isPlaying
                       ? Icons.stop
-                      : Icons.play_arrow, // Muda o ícone dinamicamente
+                      : Icons.play_arrow,
                   color: _isPlaying
-                      ? Color.fromARGB(255, 84, 173, 255) // Cor do ícone "Stop"
+                      ? Color.fromARGB(255, 84, 173, 255)
                       : Color.fromARGB(
-                          255, 13, 110, 253), // Cor do ícone "Play"
+                          255, 13, 110, 253),
                 ),
               ),
             ],
@@ -305,7 +321,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       child: ResultDisplay(
                         display: _controller.display,
                         operation:
-                            _controller.expression, // Passe a operação atual
+                            _controller.expression,
                         currentNoteIndex: _currentNoteIndex,
                         digitColors: _controller.digitColors,
                       ),
@@ -330,7 +346,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _handleKeyPress(String key) {
     setState(() {
       _controller.processKey(key);
-      _currentNoteIndex = -1; // Reseta o índice ao pressionar uma tecla
+      _currentNoteIndex = -1; 
     });
   }
 }

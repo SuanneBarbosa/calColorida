@@ -6,10 +6,10 @@ class MosaicDisplay extends StatefulWidget {
   final int decimalPlaces;
   final int digitsPerRow;
   final double squareSize;
-  final int? currentNoteIndex; // Índice da nota atual
+  final int? currentNoteIndex;
   final Function(int)? onNoteTap;
   final Function(int)?
-      onMaxDigitsCalculated; // Callback para informar o maxDigits
+      onMaxDigitsCalculated;
 
   const MosaicDisplay({
     Key? key,
@@ -20,7 +20,7 @@ class MosaicDisplay extends StatefulWidget {
     required this.squareSize,
     this.currentNoteIndex,
     this.onNoteTap,
-    this.onMaxDigitsCalculated, // Inicialização do callback
+    this.onMaxDigitsCalculated,
   }) : super(key: key);
 
   @override
@@ -35,25 +35,13 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
     return LayoutBuilder(
       builder: (context, constraints) {
         double availableHeight = constraints.maxHeight;
-
-        // Número fixo de linhas que queremos manter
         int numRows = 14;
-
-        // Calcula quantos quadrados (em altura) cabem na área disponível
         int maxRows = (availableHeight / widget.squareSize).floor();
-
-        // Ajusta o número de linhas se necessário para não exceder a altura disponível
         if (maxRows < numRows) {
           numRows = maxRows;
         }
-
-        // Obter o número de dígitos por linha
         int digitsPerRow = widget.digitsPerRow;
-
-        // Calcular o número máximo de dígitos (quadrados) no mosaico
         int maxDigits = digitsPerRow * numRows;
-
-        // Se o maxDigits mudou, agendar um callback para notificar o widget pai
         if (_previousMaxDigits != maxDigits) {
           _previousMaxDigits = maxDigits;
 
@@ -72,16 +60,12 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
   Widget _buildMosaic(String result, int maxDigits, int digitsPerRow) {
     if (result.contains('.')) {
       String decimalPart = result.split('.')[1];
-
-      // Remover zeros à direita
       decimalPart = decimalPart.replaceAll(RegExp(r'0+$'), '');
 
-      // Limitar a parte decimal ao número máximo de dígitos que cabem no mosaico
       if (decimalPart.length > maxDigits) {
         decimalPart = decimalPart.substring(0, maxDigits);
       }
 
-      // Quebrar a parte decimal em grupos para o mosaico
       List<List<String>> decimalGroups = [];
       for (var i = 0; i < decimalPart.length; i += digitsPerRow) {
         int endIndex = i + digitsPerRow;
@@ -91,7 +75,6 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
         decimalGroups.add(decimalPart.substring(i, endIndex).split(''));
       }
 
-      // Criar as linhas do mosaico
       List<Widget> mosaicRows = decimalGroups.asMap().entries.map((entry) {
         final int rowIndex = entry.key;
         final List<String> group = entry.value;
@@ -99,7 +82,7 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
         return Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment:
-              MainAxisAlignment.start, // Alinha os quadrados à esquerda
+              MainAxisAlignment.start,
           children: group.asMap().entries.map((entry) {
             final int digitIndex = entry.key;
             final String digit = entry.value;
@@ -116,8 +99,8 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
                 height: widget.squareSize,
                 decoration: BoxDecoration(
                   color: widget.currentNoteIndex == globalIndex
-                      ? Colors.black // Destaca o quadrado da nota atual
-                      : widget.digitColors[digit], // Cor do dígito
+                      ? Colors.black 
+                      : widget.digitColors[digit],
                   border: Border.all(color: Colors.black, width: 1),
                 ),
               ),

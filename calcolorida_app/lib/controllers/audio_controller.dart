@@ -1,27 +1,39 @@
-import 'dart:async'; // Import necessário para usar StreamSubscription
+import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:calcolorida_app/constants/constants.dart';
 
-AudioPlayer? player; // Instância única do AudioPlayer
-Map<int, UriAudioSource> digitToAudioSource = {}; // Mapeia dígitos para UriAudioSource
-bool _shouldStop = false; // Variável para controlar a reprodução
+AudioPlayer? player; 
+Map<int, UriAudioSource> digitToAudioSource = {};
+bool _shouldStop = false;
 
-// Variáveis para armazenar os callbacks e o total de notas
 Function(int noteIndex)? _onNoteStarted;
 Function(int noteIndex)? _onNoteFinished;
 int _totalNotes = 0;
+String selectedInstrument = 'piano'; 
+Map<String, String> instrumentFileNameMap = {
+  'piano': 'Piano_Acustico',
+  'baixo': 'Baixo_Eletrico_Dedo',
+  'banjo': 'Banjo',
+  'flauta': 'Flauta',
+  'flautadoce': 'Flauta_Doce',
+  'guitarra': 'Guitarra_Eletrica_Limpa',
+  'orgao': 'Órgão_Hammond',
+  'pianoeletrico': 'Piano_Eletrico_1',
+  'sitar': 'Sitar',
+  'trompete': 'Trompete',
+  'violino': 'Violino',
+};
 
-// Modifique aqui: Adicione o '?' após 'SequenceState?'
 StreamSubscription<SequenceState?>? _sequenceStateSubscription;
 StreamSubscription<ProcessingState>? _processingStateSubscription;
 
-/// Inicializar as fontes de áudio
+
 Future<void> initializeAudio() async {
   try {
     if (player == null) {
       player = AudioPlayer();
 
-      // Escutar mudanças no estado da sequência
+      
       _sequenceStateSubscription = player!.sequenceStateStream.listen((sequenceState) {
         if (sequenceState != null && _onNoteStarted != null) {
           int currentIndex = sequenceState.currentIndex;
@@ -29,26 +41,30 @@ Future<void> initializeAudio() async {
         }
       });
 
-      // Escutar mudanças no estado de processamento
+      
       _processingStateSubscription = player!.processingStateStream.listen((processingState) {
         if (processingState == ProcessingState.completed) {
-          // Notificar que a reprodução terminou
+         
           if (_onNoteFinished != null) {
             _onNoteFinished!(_totalNotes - 1);
           }
         }
       });
+      
     }
+  
+    digitToAudioSource.clear();
 
-    // Inicializar as fontes de áudio apenas uma vez
-    if (digitToAudioSource.isEmpty) {
-      for (int digit = 0; digit <= 9; digit++) {
-        String note = digitToNote[digit]!; // Obter o nome da nota
-        String audioPathMp3 = 'assets/sounds/${note}_Piano_Acustico.mp3';
-        // Criar uma UriAudioSource para cada nota
-        UriAudioSource source = AudioSource.asset(audioPathMp3) as UriAudioSource;
-        digitToAudioSource[digit] = source;
-      }
+    
+    String fileNamePrefix = instrumentFileNameMap[selectedInstrument] ?? 'Piano_Acustico';
+
+    for (int digit = 0; digit <= 9; digit++) {
+      String note = digitToNote[digit]!;
+      String audioPath = 'assets/sounds/$selectedInstrument/${note}_$fileNamePrefix.mp3';
+      print("Carregando arquivo de áudio: $audioPath");
+
+      UriAudioSource source = AudioSource.asset(audioPath) as UriAudioSource;
+      digitToAudioSource[digit] = source;
     }
   } catch (e) {
     print("Erro ao inicializar fontes de áudio: $e");
@@ -63,20 +79,20 @@ void stopPlayback() {
   _shouldStop = true;
 }
 
-/// Reproduzir a melodia com cada nota tocando por uma duração específica
+
 Future<void> playMelodyAudio({
   required List<int> digits,
   int durationMs = 500,
   Function(int noteIndex)? onNoteStarted,
   Function(int noteIndex)? onNoteFinished,
-  Function()? onPlaybackCompleted, //Novo callback
+  Function()? onPlaybackCompleted, 
 }) async {
   try {
     if (player == null) {
       await initializeAudio();
     }
 
-    // Atualizar os callbacks
+    
     _onNoteStarted = onNoteStarted;
     _onNoteFinished = onNoteFinished;
     _totalNotes = digits.length;
@@ -88,24 +104,24 @@ Future<void> playMelodyAudio({
       if (digitToAudioSource.containsKey(digit)) {
         UriAudioSource originalSource = digitToAudioSource[digit]!;
 
-        // Clipping da fonte original
+        
         ClippingAudioSource clippedSource = ClippingAudioSource(
           child: originalSource,
           start: Duration.zero,
           end: Duration(milliseconds: durationMs),
-          tag: i, // Usaremos a propriedade 'tag' para identificar o índice
+          tag: i, 
         );
 
         sequence.add(clippedSource);
       }
     }
 
-    // Criar uma sequência concatenada de áudio
+   
     ConcatenatingAudioSource playlist = ConcatenatingAudioSource(children: sequence);
 
     await player!.setAudioSource(playlist);
 
-    // Iniciar a reprodução
+    
     await player!.play();
 
   } catch (e) {
@@ -113,11 +129,11 @@ Future<void> playMelodyAudio({
   }
 }
 
-/// Método para parar o áudio
+
 Future<void> stopAudio() async {
   try {
-    await player?.stop(); // Parar o áudio
-    await player?.seek(Duration.zero); // Reiniciar para o início
+    await player?.stop(); 
+    await player?.seek(Duration.zero); 
   } catch (e) {
     print("Erro ao parar o áudio: $e");
   }
@@ -125,9 +141,9 @@ Future<void> stopAudio() async {
 
 Future<void> disposeAudio() async {
   try {
-    await player?.dispose(); // Liberar recursos do player
-    await _sequenceStateSubscription?.cancel(); // Cancelar a inscrição
-    await _processingStateSubscription?.cancel(); // Cancelar a inscrição
+    await player?.dispose();
+    await _sequenceStateSubscription?.cancel(); 
+    await _processingStateSubscription?.cancel();
     player = null;
   } catch (e) {
     print("Erro ao liberar o player: $e");

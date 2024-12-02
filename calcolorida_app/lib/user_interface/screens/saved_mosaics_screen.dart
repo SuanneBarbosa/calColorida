@@ -13,37 +13,36 @@ class SavedMosaicsScreen extends StatefulWidget {
 }
 
 class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
-  int? _currentPlayingIndex; // Índice do mosaico que está tocando
-  int? _currentNoteIndex; // Índice da nota atual sendo tocada
-  bool _isPlaying = false; // Indica se algum áudio está tocando
-  int _noteDurationMs = 500; // Duração das notas
+  int? _currentPlayingIndex; 
+  int? _currentNoteIndex; 
+  bool _isPlaying = false; 
+  int _noteDurationMs = 500; 
 
   @override
   void initState() {
     super.initState();
-    initializeAudio(); // Inicializa o áudio
+    initializeAudio(); 
   }
 
   @override
   void dispose() {
-    disposeAudio(); // Libera recursos de áudio
+    disposeAudio(); 
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Defina valores padrão para os parâmetros do mosaico
     final Map<String, Color> digitColors = widget.controller.digitColors;
-    final int decimalPlaces = 400; // Ajuste conforme necessário
-    final int digitsPerRow = 40;   // Ajuste conforme necessário
-    final double squareSize = 10.0; // Ajuste conforme necessário
+    final int decimalPlaces = 400; 
+    final int digitsPerRow = 40;   
+    final double squareSize = 10.0;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mosaicos Salvos'),
+        title: const Text('Mosaicos Salvos'),
       ),
       body: widget.controller.savedMosaics.isEmpty
-          ? Center(
+          ? const Center(
               child: Text(
                 'Nenhum mosaico salvo.',
                 style: TextStyle(fontSize: 18, color: Colors.grey),
@@ -62,7 +61,7 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                         ListTile(
                           title: Text(
                             'Operação: ${mosaic.operation}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                               color: Colors.blueAccent,
@@ -76,7 +75,7 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                           ),
                         ),
                         SizedBox(
-                          height: 200, // Ajuste conforme necessário
+                          height: 200,
                           child: MosaicDisplay(
                             result: mosaic.result,
                             digitColors: digitColors,
@@ -98,19 +97,15 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                               onPressed: () {
                                 setState(() {
                                   if (_isPlaying && _currentPlayingIndex == index) {
-                                    // Parar a reprodução
                                     stopAudio();
                                     _isPlaying = false;
                                     _currentPlayingIndex = null;
                                     _currentNoteIndex = null;
                                   } else {
-                                    // Parar qualquer reprodução em andamento
                                     stopAudio();
                                     _isPlaying = false;
                                     _currentPlayingIndex = null;
                                     _currentNoteIndex = null;
-
-                                    // Iniciar a reprodução do mosaico selecionado
                                     _playSavedMosaic(mosaic.result, index);
                                   }
                                 });
@@ -148,8 +143,6 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                   widget.controller.deleteMosaic(index);
                 });
                 Navigator.of(context).pop();
-
-                // Exibir mensagem de confirmação
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Mosaico excluído com sucesso')),
                 );

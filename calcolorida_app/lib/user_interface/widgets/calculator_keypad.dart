@@ -46,7 +46,6 @@ class CalculatorKeypad extends StatelessWidget {
   return ElevatedButton(
     onPressed: () {
       if (label == 'S') {
-        // Salvar o mosaico
         onKeyPressed('save');
       } else {
         onKeyPressed(label);

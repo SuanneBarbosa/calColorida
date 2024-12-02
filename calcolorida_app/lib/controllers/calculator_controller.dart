@@ -7,20 +7,18 @@ class CalculatorController {
   String _display = '0';
   String _currentNumber = '';
   String _operation = '';
-  Decimal _result = Decimal.zero; // Usando Decimal para maior precisão
+  Decimal _result = Decimal.zero;
   bool _hasDecimal = false;
   String _expression = '';
-  int _decimalPlaces = 400; // Número padrão de casas decimais
-  int _maxDecimalPlaces = 400; // Máximo de casas decimais permitidas
+  int _decimalPlaces = 400;
+  int _maxDecimalPlaces = 400;
   bool _isResultDisplayed = false; 
 
   List<MosaicModel> savedMosaics = [];
 
-  // Getters para o display e a expressão atual
   String get display => _display;
   String get expression => _expression;
 
-  // Mapa de cores para os dígitos
   Map<String, Color> digitColors = {
     '0': Colors.red,
     '1': Colors.green,
@@ -34,7 +32,6 @@ class CalculatorController {
     '9': Colors.cyan,
   };
 
-  // Função para processar teclas pressionadas
   void processKey(String key) {
   if (key == 'save') {
     if (_isResultDisplayed) {
@@ -59,7 +56,7 @@ class CalculatorController {
     _setOperation(key);
     _expression += ' $key ';
   } else if (key == '.') {
-    _isResultDisplayed = false; // Redefine o flag
+    _isResultDisplayed = false;
     _addDecimal();
     _expression += key;
   } else if (key == '√') {
@@ -84,15 +81,13 @@ class CalculatorController {
       }
     }
   } else {
-    // Adiciona um dígito ao número atual
-    _isResultDisplayed = false; // Redefine o flag
+    _isResultDisplayed = false;
     _currentNumber += key;
     _expression += key;
   }
   _updateDisplay();
 }
 
-  // Função para limpar a calculadora
   void _clear() {
     _currentNumber = '';
     _operation = '';
@@ -100,14 +95,13 @@ class CalculatorController {
     _hasDecimal = false;
     _expression = '';
     _display = '0';
-    _isResultDisplayed = false; // Redefine o flag
+    _isResultDisplayed = false;
   }
 
-  // Função para calcular o resultado com base na operação atual
   void _calculate() {
     if (_operation.isEmpty) return;
     Decimal secondNumber =
-        Decimal.parse(_currentNumber); // Converte para Decimal
+        Decimal.parse(_currentNumber);
 
     switch (_operation) {
       case '+':
@@ -144,11 +138,9 @@ class CalculatorController {
   // ignore: unused_field
   bool _shouldStop = false;
 
-  // calculator_controller.dart
-
 Future<void> playMelody({
   int durationMs = 500,
-  int? maxDigits, // Adicione este parâmetro
+  int? maxDigits, 
   Function(int noteIndex)? onNoteStarted,
   Function(int noteIndex)? onNoteFinished,
 }) async {
@@ -191,13 +183,12 @@ Future<void> playMelody({
 
 
   Future<void> stopMelody() async {
-  stopPlayback(); // Chama a função em audio_controller.dart para parar a reprodução
-  await stopAudio(); // Chama a função em audio_controller.dart para parar o áudio
+  stopPlayback(); 
+  await stopAudio();
 }
 
-  // Função para definir a operação matemática
   void _setOperation(String op) {
-    _isResultDisplayed = false; // Redefine o flag
+    _isResultDisplayed = false;
     if (_currentNumber.isNotEmpty) {
       if (_operation.isNotEmpty) {
         _calculate();
@@ -215,7 +206,6 @@ Future<void> playMelody({
     }
   }
 
-  // Função para adicionar um ponto decimal
   void _addDecimal() {
     if (!_hasDecimal) {
       if (_currentNumber.isEmpty) {
@@ -227,7 +217,6 @@ Future<void> playMelody({
     }
   }
 
-  // Função para aplicar o número de casas decimais
   void _applyDecimalPlaces() {
     if (_decimalPlaces < 0) {
       _decimalPlaces = 0;
@@ -235,7 +224,6 @@ Future<void> playMelody({
     _updateDisplay();
   }
 
-  // Função para definir o número de casas decimais
   void setDecimalPlaces(int decimalPlaces) {
     if (decimalPlaces >= 0 && decimalPlaces <= _maxDecimalPlaces) {
       _decimalPlaces = decimalPlaces;
@@ -243,7 +231,6 @@ Future<void> playMelody({
     _applyDecimalPlaces();
   }
 
-  // Função para atualizar o display com o valor atual
   void _updateDisplay() {
     if (_currentNumber.isEmpty) {
       _display = _result.toStringAsFixed(_decimalPlaces);
@@ -251,42 +238,35 @@ Future<void> playMelody({
       _display = _currentNumber;
     }
 
-    // Remove ponto decimal isolado no final
     if (_display.endsWith('.')) {
       _display = _display.substring(0, _display.length - 1);
     }
 
-    // Remove zeros desnecessários após o ponto decimal
     if (_display.contains('.')) {
       _display = _display.replaceAll(RegExp(r'\.?0+$'), '');
     }
 
-    // Remove '.0' do final, se presente
     if (_display.endsWith('.0')) {
       _display = _display.substring(0, _display.length - 2);
     }
   }
 
-  // Função para calcular a raiz quadrada
   void _calculateSqrt() {
     if (_currentNumber.isNotEmpty) {
       try {
         Decimal number = Decimal.parse(_currentNumber);
 
-        // Verificar se o número é negativo
         if (number < Decimal.zero) {
           _display = 'Erro: Número negativo';
           return;
         }
 
-        // Calcular a raiz quadrada usando o método de Newton-Raphson
         Decimal sqrtResult = _sqrtNewtonRaphson(number, _decimalPlaces);
 
         _result = sqrtResult;
 
-        // Atualizar o display
         _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-        _isResultDisplayed = true; // Define o flag como verdadeiro
+        _isResultDisplayed = true; 
         _updateDisplay();
       } catch (e) {
         _display = 'Erro';
@@ -322,7 +302,6 @@ Future<void> playMelody({
         break;
       }
 
-      // Verificar se a diferença entre as suposições é menor que a precisão desejada
       Decimal difference = (guess - lastGuess).abs();
       Decimal epsilon = Decimal.parse('1e-${decimalPlaces + 1}');
       if (difference < epsilon) {
@@ -330,13 +309,10 @@ Future<void> playMelody({
       }
     }
 
-    // Arredondar o resultado para o número de casas decimais desejado
     return Decimal.parse(guess.toStringAsFixed(decimalPlaces));
   }
 
-  // Função para inserir o valor de Pi
   void _insertPi() {
-    // Definindo Pi com alta precisão
     final Decimal piDecimal =
         Decimal.parse('3.14159265358979323846264338327950288419716939937510582097494459230');
 
@@ -347,7 +323,6 @@ Future<void> playMelody({
     }
   }
 
-  // Função para calcular o inverso (1/x)
   void _calculateInverse() {
     if (_currentNumber.isNotEmpty) {
       try {
@@ -372,16 +347,13 @@ Future<void> playMelody({
       try {
         Decimal numberDecimal = Decimal.parse(_currentNumber);
 
-        // Verificar se o número é inteiro
         if ((numberDecimal % Decimal.one) != Decimal.zero) {
           _display = 'Erro: Entrada não é um inteiro';
           return;
         }
 
-        // Converter para BigInt
         BigInt number = numberDecimal.toBigInt();
 
-        // Verificar se o número é não negativo
         if (number >= BigInt.zero) {
           BigInt factorialResult = _factorial(number);
           _result = Decimal.fromBigInt(factorialResult);
@@ -397,7 +369,6 @@ Future<void> playMelody({
     }
   }
 
-  // Método para calcular o fatorial usando BigInt
   BigInt _factorial(BigInt n) {
     if (n < BigInt.zero) throw ArgumentError('Número negativo não permitido');
     BigInt result = BigInt.one;
@@ -407,7 +378,6 @@ Future<void> playMelody({
     return result;
   }
 
-  // Função para remover o último dígito inserido
   void _backspace() {
     if (_currentNumber.isNotEmpty) {
       if (_currentNumber.endsWith('.')) {
@@ -419,7 +389,6 @@ Future<void> playMelody({
   }
 
 
-  // Função para calcular a potência de um Decimal elevado a um expoente inteiro
   Decimal _powDecimal(Decimal base, int exponent) {
     return base
         .pow(exponent)
