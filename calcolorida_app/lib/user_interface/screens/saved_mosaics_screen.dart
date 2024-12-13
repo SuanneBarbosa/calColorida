@@ -1,3 +1,4 @@
+import 'package:calcolorida_app/models/mosaic_model.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/calculator_controller.dart';
 import '../widgets/mosaic_display.dart';
@@ -5,36 +6,39 @@ import '../../controllers/audio_controller.dart';
 
 class SavedMosaicsScreen extends StatefulWidget {
   final CalculatorController controller;
+  final VoidCallback? onMosaicApplied;
 
-  const SavedMosaicsScreen({Key? key, required this.controller}) : super(key: key);
+  const SavedMosaicsScreen(
+      {Key? key, required this.controller, this.onMosaicApplied})
+      : super(key: key);
 
   @override
   _SavedMosaicsScreenState createState() => _SavedMosaicsScreenState();
 }
 
 class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
-  int? _currentPlayingIndex; 
-  int? _currentNoteIndex; 
-  bool _isPlaying = false; 
-  int _noteDurationMs = 500; 
+  int? _currentPlayingIndex;
+  int? _currentNoteIndex;
+  // bool _isPlaying = false;
+  // int _noteDurationMs = 500;
 
   @override
   void initState() {
     super.initState();
-    initializeAudio(); 
+    initializeAudio();
   }
 
   @override
   void dispose() {
-    disposeAudio(); 
+    disposeAudio();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final Map<String, Color> digitColors = widget.controller.digitColors;
-    final int decimalPlaces = 400; 
-    final int digitsPerRow = 40;   
+    final int decimalPlaces = 400;
+    final int digitsPerRow = 40;
     final double squareSize = 10.0;
 
     return Scaffold(
@@ -67,11 +71,31 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                               color: Colors.blueAccent,
                             ),
                           ),
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              _confirmDeletion(index);
-                            },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  _applySavedMosaic(mosaic);
+                                  print(
+                                      'Aplicando mosaico: operação=${mosaic.operation}, resultado=${mosaic.result}');
+                                },
+                                child: const Text(
+                                  'Aplicar',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  _confirmDeletion(index);
+                                },
+                              ),
+                            ],
                           ),
                         ),
                         SizedBox(
@@ -82,36 +106,12 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                             decimalPlaces: decimalPlaces,
                             digitsPerRow: digitsPerRow,
                             squareSize: squareSize,
-                            currentNoteIndex: _currentPlayingIndex == index ? _currentNoteIndex : null,
+                            currentNoteIndex: _currentPlayingIndex == index
+                                ? _currentNoteIndex
+                                : null,
                             onNoteTap: null,
                             onMaxDigitsCalculated: null,
                           ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                _isPlaying && _currentPlayingIndex == index ? Icons.stop : Icons.play_arrow,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (_isPlaying && _currentPlayingIndex == index) {
-                                    stopAudio();
-                                    _isPlaying = false;
-                                    _currentPlayingIndex = null;
-                                    _currentNoteIndex = null;
-                                  } else {
-                                    stopAudio();
-                                    _isPlaying = false;
-                                    _currentPlayingIndex = null;
-                                    _currentNoteIndex = null;
-                                    _playSavedMosaic(mosaic.result, index);
-                                  }
-                                });
-                              },
-                            ),
-                          ],
                         ),
                       ],
                     ),
@@ -127,24 +127,24 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Excluir Mosaico'),
-          content: Text('Deseja realmente excluir este mosaico?'),
+          title: const Text('Excluir Mosaico'),
+          content: const Text('Deseja realmente excluir este mosaico?'),
           actions: [
             TextButton(
-              child: Text('Cancelar'),
+              child: const Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Excluir', style: TextStyle(color: Colors.red)),
+              child: const Text('Excluir', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 setState(() {
                   widget.controller.deleteMosaic(index);
                 });
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Mosaico excluído com sucesso')),
+                  const SnackBar(content: Text('Mosaico excluído com sucesso')),
                 );
               },
             ),
@@ -154,62 +154,18 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
     );
   }
 
-  void _playSavedMosaic(String result, int index) async {
-    setState(() {
-      _isPlaying = true;
-      _currentPlayingIndex = index;
-    });
+ void _applySavedMosaic(MosaicModel mosaic) async {
 
-    if (result.contains('.')) {
-      String decimalPart = result.split('.')[1];
-      decimalPart = decimalPart.replaceAll(RegExp(r'0+$'), '');
+  widget.controller.loadMosaic(mosaic.operation, mosaic.result);
+  widget.controller.squareSize = mosaic.squareSize;
+  widget.controller.selectedInstrument = mosaic.instrument;
+  widget.controller.noteDurationMs = mosaic.noteDurationMs;
 
-      List<int> digits = decimalPart.split('').map(int.parse).toList();
+    await widget.controller.saveSettings();
 
-      if (digits.isEmpty) {
-        print("Nenhum dígito para reproduzir após o ponto decimal.");
-        setState(() {
-          _isPlaying = false;
-          _currentPlayingIndex = null;
-        });
-        return;
-      }
+  widget.onMosaicApplied?.call();
+  Navigator.pop(context);
 
-      try {
-        await playMelodyAudio(
-          digits: digits,
-          durationMs: _noteDurationMs,
-          onNoteStarted: (noteIndex) {
-            setState(() {
-              _currentNoteIndex = noteIndex;
-            });
-          },
-          onNoteFinished: (noteIndex) {
-            setState(() {
-              _currentNoteIndex = null;
-            });
-          },
-          onPlaybackCompleted: () {
-            setState(() {
-              _isPlaying = false;
-              _currentPlayingIndex = null;
-              _currentNoteIndex = null;
-            });
-          },
-        );
-      } catch (e) {
-        print("Erro ao reproduzir melodia: $e");
-        setState(() {
-          _isPlaying = false;
-          _currentPlayingIndex = null;
-        });
-      }
-    } else {
-      print("O resultado não contém parte decimal.");
-      setState(() {
-        _isPlaying = false;
-        _currentPlayingIndex = null;
-      });
-    }
-  }
+ await initializeAudio();
+}
 }

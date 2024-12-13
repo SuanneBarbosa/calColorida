@@ -8,8 +8,7 @@ class MosaicDisplay extends StatefulWidget {
   final double squareSize;
   final int? currentNoteIndex;
   final Function(int)? onNoteTap;
-  final Function(int)?
-      onMaxDigitsCalculated;
+  final Function(int)? onMaxDigitsCalculated;
 
   const MosaicDisplay({
     Key? key,
@@ -36,7 +35,20 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
       builder: (context, constraints) {
         double availableHeight = constraints.maxHeight;
         int numRows = 14;
-        int maxRows = (availableHeight / widget.squareSize).floor();
+        double safeSquareSize =
+            widget.squareSize <= 0 ? 1.0 : widget.squareSize;
+        double safeAvailableHeight =
+            (availableHeight.isFinite && !availableHeight.isNaN)
+                ? availableHeight
+                : 100.0; // um valor padrão qualquer que não seja zero
+
+        double ratio = safeAvailableHeight / safeSquareSize;
+        if (!ratio.isFinite || ratio.isNaN) {
+          ratio = 1.0; // fallback
+        }
+
+        int maxRows = ratio.floor();
+        // int maxRows = (availableHeight / widget.squareSize).floor();
         if (maxRows < numRows) {
           numRows = maxRows;
         }
@@ -81,8 +93,7 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
 
         return Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment:
-              MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: group.asMap().entries.map((entry) {
             final int digitIndex = entry.key;
             final String digit = entry.value;
@@ -99,7 +110,7 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
                 height: widget.squareSize,
                 decoration: BoxDecoration(
                   color: widget.currentNoteIndex == globalIndex
-                      ? Colors.black 
+                      ? Colors.black
                       : widget.digitColors[digit],
                   border: Border.all(color: Colors.black, width: 1),
                 ),

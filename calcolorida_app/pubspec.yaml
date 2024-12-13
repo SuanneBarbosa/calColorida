@@ -39,6 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   decimal: ^3.0.2
   just_audio: ^0.9.42
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:

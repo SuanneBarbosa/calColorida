@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:decimal/decimal.dart';
 import 'package:calcolorida_app/controllers/audio_controller.dart';
 import 'package:calcolorida_app/models/mosaic_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../services/shared_preferences_service.dart';
 
 class CalculatorController {
   String _display = '0';
@@ -11,13 +16,31 @@ class CalculatorController {
   bool _hasDecimal = false;
   String _expression = '';
   int _decimalPlaces = 400;
-  int _maxDecimalPlaces = 400;
-  bool _isResultDisplayed = false; 
+  final int _maxDecimalPlaces = 400;
+  bool _isResultDisplayed = false;
+  double _squareSize = 20.0; 
+  int _noteDurationMs = 500; 
+  String _selectedInstrument = 'piano';
 
   List<MosaicModel> savedMosaics = [];
 
   String get display => _display;
   String get expression => _expression;
+  int get noteDurationMs => _noteDurationMs;
+  String get selectedInstrument => _selectedInstrument;
+  double get squareSize => _squareSize;
+
+  set squareSize(double value) {
+    _squareSize = value;
+  }
+
+  set selectedInstrument(String value) {
+    _selectedInstrument = value;
+  }
+
+  set noteDurationMs(int value) {
+    _noteDurationMs = value;
+  }
 
   Map<String, Color> digitColors = {
     '0': Colors.red,
@@ -33,60 +56,69 @@ class CalculatorController {
   };
 
   void processKey(String key) {
-  if (key == 'save') {
-    if (_isResultDisplayed) {
-      saveMosaic(_expression.trim(), _display);
+    if (key == 'save') {
+      // if (_isResultDisplayed) {
+      //   saveMosaic(
+      //     _expression.trim(),
+      //     _display,
+      //     _squareSize,
+      //     selectedInstrument,
+      //     noteDurationMs
+      //   );
+      // }
+      return;
     }
-    return;
-  }
-  if (_operation.isEmpty &&
-      _display == _result.toString() &&
-      (key != 'C' &&
-          key != '=' &&
-          !['+', '-', 'x', '/', '^', '√', 'π', '1/x', '!', '<-', 'S']
-              .contains(key))) {
-    _clear();
-  }
-  if (key == 'C') {
-    stopMelody();
-    _clear();
-  } else if (key == '=') {
-    _calculate();
-  } else if (['+', '-', 'x', '/', '^'].contains(key)) {
-    _setOperation(key);
-    _expression += ' $key ';
-  } else if (key == '.') {
-    _isResultDisplayed = false;
-    _addDecimal();
-    _expression += key;
-  } else if (key == '√') {
-    _calculateSqrt();
-    _expression = '√(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
-  } else if (key == 'π') {
-    _insertPi();
-    _expression += 'π';
-  } else if (key == '1/x') {
-    _calculateInverse();
-    _expression = '1/(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
-  } else if (key == '!') {
-    _calculateFactorial();
-    _expression = '(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})!';
-  } else if (key == '<-') {
-    if (_isResultDisplayed) {
-    } else if (_currentNumber.isEmpty) {
-    } else {
-      _backspace();
-      if (_expression.isNotEmpty) {
-        _expression = _expression.substring(0, _expression.length - 1);
+    if (_operation.isEmpty &&
+        _display == _result.toString() &&
+        (key != 'C' &&
+            key != '=' &&
+            !['+', '-', 'x', '/', '^', '√', 'π', '1/x', '!', '<-', 'S']
+                .contains(key))) {
+      _clear();
+    }
+    if (key == 'C') {
+      stopMelody();
+      _clear();
+    } else if (key == '=') {
+      _calculate();
+    } else if (['+', '-', 'x', '/', '^'].contains(key)) {
+      _setOperation(key);
+      _expression += ' $key ';
+    } else if (key == '.') {
+      _isResultDisplayed = false;
+      _addDecimal();
+      _expression += key;
+    } else if (key == '√') {
+      _calculateSqrt();
+      _expression =
+          '√(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
+    } else if (key == 'π') {
+      _insertPi();
+      _expression += 'π';
+    } else if (key == '1/x') {
+      _calculateInverse();
+      _expression =
+          '1/(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
+    } else if (key == '!') {
+      _calculateFactorial();
+      _expression =
+          '(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})!';
+    } else if (key == '<-') {
+      if (_isResultDisplayed) {
+      } else if (_currentNumber.isEmpty) {
+      } else {
+        _backspace();
+        if (_expression.isNotEmpty) {
+          _expression = _expression.substring(0, _expression.length - 1);
+        }
       }
+    } else {
+      _isResultDisplayed = false;
+      _currentNumber += key;
+      _expression += key;
     }
-  } else {
-    _isResultDisplayed = false;
-    _currentNumber += key;
-    _expression += key;
+    _updateDisplay();
   }
-  _updateDisplay();
-}
 
   void _clear() {
     _currentNumber = '';
@@ -100,8 +132,7 @@ class CalculatorController {
 
   void _calculate() {
     if (_operation.isEmpty) return;
-    Decimal secondNumber =
-        Decimal.parse(_currentNumber);
+    Decimal secondNumber = Decimal.parse(_currentNumber);
 
     switch (_operation) {
       case '+':
@@ -129,63 +160,58 @@ class CalculatorController {
     _currentNumber = _result.toStringAsFixed(_decimalPlaces);
     _operation = '';
     // _expression = '';
-    _isResultDisplayed = true; 
+    _isResultDisplayed = true;
     _updateDisplay();
   }
 
-  
-  
   // ignore: unused_field
   bool _shouldStop = false;
 
-Future<void> playMelody({
-  int durationMs = 500,
-  int? maxDigits, 
-  Function(int noteIndex)? onNoteStarted,
-  Function(int noteIndex)? onNoteFinished,
-}) async {
-  if (!_isResultDisplayed) {
-    print("O áudio só pode tocar após o resultado ser exibido.");
-    return;
-  }
-
-  _shouldStop = false;
-
-  if (_currentNumber.isNotEmpty && _currentNumber.contains('.')) {
-    List<String> parts = _currentNumber.split('.');
-    String decimalPart = parts[1].replaceAll(RegExp(r'0+$'), '');
-
-    // Limitar ao maxDigits se especificado
-    if (maxDigits != null && decimalPart.length > maxDigits) {
-      decimalPart = decimalPart.substring(0, maxDigits);
-    }
-
-    List<int> digits = decimalPart.split('').map(int.parse).toList();
-
-    if (digits.isEmpty) {
-      print("Nenhum dígito para reproduzir após o ponto decimal.");
+  Future<void> playMelody({
+    int durationMs = 500,
+    int? maxDigits,
+    Function(int noteIndex)? onNoteStarted,
+    Function(int noteIndex)? onNoteFinished,
+  }) async {
+    if (!_isResultDisplayed) {
+      print("O áudio só pode tocar após o resultado ser exibido.");
       return;
     }
 
-    try {
-      await playMelodyAudio(
-        digits: digits,
-        durationMs: durationMs,
-        onNoteStarted: onNoteStarted,
-        onNoteFinished: onNoteFinished,
-      );
-    } catch (e) {
-      print("Erro ao reproduzir melodia: $e");
+    _shouldStop = false;
+
+    if (_currentNumber.isNotEmpty && _currentNumber.contains('.')) {
+      List<String> parts = _currentNumber.split('.');
+      String decimalPart = parts[1].replaceAll(RegExp(r'0+$'), '');
+
+      if (maxDigits != null && decimalPart.length > maxDigits) {
+        decimalPart = decimalPart.substring(0, maxDigits);
+      }
+
+      List<int> digits = decimalPart.split('').map(int.parse).toList();
+
+      if (digits.isEmpty) {
+        print("Nenhum dígito para reproduzir após o ponto decimal.");
+        return;
+      }
+
+      try {
+        await playMelodyAudio(
+          digits: digits,
+          durationMs: durationMs,
+          onNoteStarted: onNoteStarted,
+          onNoteFinished: onNoteFinished,
+        );
+      } catch (e) {
+        print("Erro ao reproduzir melodia: $e");
+      }
     }
   }
-}
-
-
 
   Future<void> stopMelody() async {
-  stopPlayback(); 
-  await stopAudio();
-}
+    stopPlayback();
+    await stopAudio();
+  }
 
   void _setOperation(String op) {
     _isResultDisplayed = false;
@@ -266,7 +292,7 @@ Future<void> playMelody({
         _result = sqrtResult;
 
         _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-        _isResultDisplayed = true; 
+        _isResultDisplayed = true;
         _updateDisplay();
       } catch (e) {
         _display = 'Erro';
@@ -313,8 +339,8 @@ Future<void> playMelody({
   }
 
   void _insertPi() {
-    final Decimal piDecimal =
-        Decimal.parse('3.14159265358979323846264338327950288419716939937510582097494459230');
+    final Decimal piDecimal = Decimal.parse(
+        '3.14159265358979323846264338327950288419716939937510582097494459230');
 
     if (_currentNumber.isEmpty) {
       _currentNumber = piDecimal.toStringAsFixed(_decimalPlaces);
@@ -331,7 +357,7 @@ Future<void> playMelody({
           _result = (Decimal.one / number)
               .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
           _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-          _isResultDisplayed = true; // Define o flag como verdadeiro
+          _isResultDisplayed = true;
           _updateDisplay();
         } else {
           _display = 'Erro: Divisão por zero';
@@ -388,20 +414,66 @@ Future<void> playMelody({
     _updateDisplay();
   }
 
-
   Decimal _powDecimal(Decimal base, int exponent) {
     return base
         .pow(exponent)
         .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
   }
 
-   void saveMosaic(String operation, String result) {
-    savedMosaics.add(MosaicModel(operation: operation, result: result));
+  Future<void> saveMosaic(String operation, String result, double squareSize,
+      String instrument, int noteDurationMs) async {
+      savedMosaics.add(MosaicModel(
+      operation: operation,
+      result: result, 
+      squareSize: squareSize,
+      instrument: instrument,
+      noteDurationMs: noteDurationMs,));
+    final prefs = await SharedPreferences.getInstance();
+    final mosaicList = savedMosaics.map((mosaic) => mosaic.toJson()).toList();
+  await prefs.setStringList('savedMosaics', mosaicList.map((e) => jsonEncode(e)).toList());
+  await saveSettings();
   }
+
+  Future<void> saveSettings() async {
+    await SharedPreferencesService.saveResult(_display);
+    await SharedPreferencesService.saveOperation(_expression);
+    await SharedPreferencesService.saveZoom(squareSize);
+    await SharedPreferencesService.saveInstrument(selectedInstrument);
+    await SharedPreferencesService.saveNoteDuration(_noteDurationMs);
+  }
+
+  Future<void> loadSettings() async {
+  _display = await SharedPreferencesService.getResult() ?? "0";
+  _expression = await SharedPreferencesService.getOperation() ?? "";
+  _squareSize = await SharedPreferencesService.getZoom() ?? _squareSize;
+  _selectedInstrument = await SharedPreferencesService.getInstrument() ?? _selectedInstrument;
+  _noteDurationMs = await SharedPreferencesService.getNoteDuration() ?? _noteDurationMs;
+}
 
   void deleteMosaic(int index) {
     if (index >= 0 && index < savedMosaics.length) {
       savedMosaics.removeAt(index);
+    }
+  }
+
+  void loadMosaic(String operation, String result) {
+    print('Carregando mosaico no controlador');
+
+    _expression = operation;
+    _currentNumber = result;
+    _result = Decimal.parse(result);
+    _isResultDisplayed = true;
+    _updateDisplay();
+  }
+    Future<void> loadMosaics() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mosaicListJson = prefs.getStringList('savedMosaics');
+
+    if (mosaicListJson != null) {
+      savedMosaics = mosaicListJson.map((mosaicJson) {
+        final mosaicMap = jsonDecode(mosaicJson);
+        return MosaicModel.fromJson(mosaicMap);
+      }).toList();
     }
   }
 }
