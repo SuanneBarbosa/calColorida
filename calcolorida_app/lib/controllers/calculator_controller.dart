@@ -110,6 +110,7 @@ class CalculatorController {
         _backspace();
         if (_expression.isNotEmpty) {
           _expression = _expression.substring(0, _expression.length - 1);
+          
         }
       }
     } else {
@@ -154,7 +155,15 @@ class CalculatorController {
         }
         break;
       case '^':
-        _result = _powDecimal(_result, int.parse(secondNumber.toString()));
+        try {
+          int exponent = int.parse(secondNumber.toString()); //mantendo seu código original
+          print("Expoente (int): $exponent");
+          _result = _powDecimal(_result, exponent);
+          print("Resultado da exponenciação: $_result");
+        } catch (e) {
+          _display = 'Erro: Expoente inválido';
+          print("Erro ao converter expoente para inteiro: $e");
+        }
         break;
     }
     _currentNumber = _result.toStringAsFixed(_decimalPlaces);
@@ -450,9 +459,17 @@ class CalculatorController {
   _noteDurationMs = await SharedPreferencesService.getNoteDuration() ?? _noteDurationMs;
 }
 
-  void deleteMosaic(int index) {
+Future<void> _saveMosaicsToPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mosaicList = savedMosaics.map((mosaic) => mosaic.toJson()).toList();
+    await prefs.setStringList(
+        'savedMosaics', mosaicList.map((e) => jsonEncode(e)).toList());
+  }
+
+  void deleteMosaic(int index) async  {
     if (index >= 0 && index < savedMosaics.length) {
       savedMosaics.removeAt(index);
+        await _saveMosaicsToPreferences(); // Salva a lista atualizada
     }
   }
 

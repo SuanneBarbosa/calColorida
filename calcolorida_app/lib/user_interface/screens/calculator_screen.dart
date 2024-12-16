@@ -28,8 +28,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   int? _currentNoteIndex;
   bool _isPlaying = false;
   int _maxDigitsInMosaic = 0;
+  // ignore: unused_field
   bool _showChallengeMosaic = false;
   String _challengeMosaic = "";
+  String? _activeChallengeType;
+  bool _isPlayingAudio = false;
 
   final Map<String, Color> digitColors = {
     '0': Colors.red,
@@ -44,13 +47,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     '9': Colors.cyan,
   };
 
+  
   @override
   void initState() {
     super.initState();
     _controller = CalculatorController();
-    _loadPreferences();
-     _controller.loadMosaics();
-    initializeAudio();
+    // _loadPreferences();
+    _controller.loadMosaics();
+    // initializeAudio();
+
   }
 
   @override
@@ -117,6 +122,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Navigator.pop(context);
                   // Desafio Som
                   print("Desafio Som selecionado");
+                  _startSoundChallenge();
                 },
                 child: const Text("Som (Apenas Áudio)"),
               ),
@@ -125,6 +131,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Navigator.pop(context);
                   // Desafio Som e Imagem
                   print("Desafio Som e Imagem selecionado");
+                  _startSoundAndImageChallenge();
                 },
                 child: const Text("Som e Imagem"),
               ),
@@ -135,19 +142,134 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  void _startStandardChallenge() {
+  void _generateChallengeMosaic() {
     final rand = Random();
-    const length = 50;
+    const length = 247; // Quantidade de dígitos no total
     String randomMosaic = "";
-    for (int i = 0; i < length; i++) {
-      randomMosaic += rand.nextInt(10).toString();
+
+    // Decide aleatoriamente se o número será periódico ou não periódico
+    bool isPeriodic = rand.nextBool();
+
+    if (isPeriodic) {
+      // Criar sequência periódica
+      int periodLength =
+          rand.nextInt(5) + 1; // Tamanho do período (1 a 5 dígitos)
+      String period = "";
+      for (int i = 0; i < periodLength; i++) {
+        period += rand.nextInt(10).toString();
+      }
+
+      // Repetir o período até atingir o comprimento necessário
+      while (randomMosaic.length < length) {
+        randomMosaic += period;
+      }
+      randomMosaic =
+          randomMosaic.substring(0, length); // Ajustar para o comprimento exato
+    } else {
+      // Criar número não periódico
+      for (int i = 0; i < length; i++) {
+        randomMosaic += rand.nextInt(10).toString();
+      }
     }
 
     _challengeMosaic = "0.$randomMosaic";
+  }
+
+  void _toggleAudioPlayback() {
+    if (_isPlayingAudio) {
+      // Pausa o áudio
+      player?.pause();
+      setState(() {
+        _isPlayingAudio = false;
+      });
+    } else {
+      // Reproduz ou reinicia o áudio
+      player?.play();
+      setState(() {
+        _isPlayingAudio = true;
+      });
+    }
+  }
+
+  void _repeatAudio() {
+    String decimalPart = _challengeMosaic.split('.')[1];
+    List<int> digits = decimalPart.split('').map(int.parse).toList();
+
+    // Reproduz o som novamente
+    playMelodyAudio(
+      digits: digits,
+      durationMs: 500,
+      onNoteStarted: (noteIndex) {},
+      onNoteFinished: (noteIndex) {},
+      onPlaybackCompleted: () {
+        setState(() {
+          _isPlayingAudio = false; // Altera o botão para "Reproduzir"
+        });
+      },
+    );
 
     setState(() {
-      _showChallengeMosaic = true;
+      _isPlayingAudio = true; // Atualiza o estado para "tocando"
     });
+  }
+
+  void _startStandardChallenge() {
+    _controller.processKey('C'); // Limpa a tela antes de iniciar o desafio
+    _generateChallengeMosaic(); // Gera o número decimal (periódico ou não periódico)
+
+    setState(() {
+      _activeChallengeType = 'standard'; // Tipo de desafio
+    });
+  }
+
+  void _startSoundAndImageChallenge() {
+    _controller.processKey('C'); // Limpa a tela antes de iniciar o desafio
+    _generateChallengeMosaic(); // Gera o número decimal (periódico ou não periódico)
+
+    setState(() {
+      _activeChallengeType = 'soundAndImage';
+      _isPlayingAudio = true; // O som começa tocando
+    });
+
+    // Extrair dígitos e reproduzir som
+    String decimalPart = _challengeMosaic.split('.')[1];
+    List<int> digits = decimalPart.split('').map(int.parse).toList();
+
+    playMelodyAudio(
+      digits: digits,
+      durationMs: 500,
+      onNoteStarted: (noteIndex) {},
+      onNoteFinished: (noteIndex) {},
+      onPlaybackCompleted: () {
+        setState(() {
+          _isPlayingAudio =
+              false; // Altera o botão para "Reproduzir" ao terminar
+        });
+      },
+    );
+  }
+
+  void _startSoundChallenge() {
+    _controller.processKey('C'); // Limpa a tela antes de iniciar o desafio
+    _generateChallengeMosaic();
+
+    setState(() {
+      _activeChallengeType = 'sound';
+      _isPlayingAudio = true; // Começa no estado "tocando"
+    });
+
+    String decimalPart = _challengeMosaic.split('.')[1];
+    List<int> digits = decimalPart.split('').map(int.parse).toList();
+
+    playMelodyAudio(
+      digits: digits,
+      durationMs: 500,
+      onPlaybackCompleted: () {
+        setState(() {
+          _isPlayingAudio = false; // Define como "não tocando" ao finalizar
+        });
+      },
+    );
   }
 
   @override
@@ -231,7 +353,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   setState(() {
                     _noteDurationMs = 3000 - value.toInt();
                   });
-                  await SharedPreferencesService.saveNoteDuration(_noteDurationMs);
+                  await SharedPreferencesService.saveNoteDuration(
+                      _noteDurationMs);
                 },
               ),
             ),
@@ -244,10 +367,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     builder: (context) => SavedMosaicsScreen(
                       controller: _controller,
                       onMosaicApplied: () async {
-                        // Ao aplicar um mosaico salvo, recarrega zoom e instrumento
                         final zoom = await SharedPreferencesService.getZoom();
-                        final instrument = await SharedPreferencesService.getInstrument();
-                        final duration = await SharedPreferencesService.getNoteDuration();
+                        final instrument =
+                            await SharedPreferencesService.getInstrument();
+                        final duration =
+                            await SharedPreferencesService.getNoteDuration();
 
                         setState(() {
                           if (zoom != null) {
@@ -294,7 +418,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       selectedInstrument = newInstrument;
                       initializeAudio();
                     });
-                    await SharedPreferencesService.saveInstrument(newInstrument);
+                    await SharedPreferencesService.saveInstrument(
+                        newInstrument);
                   }
                 },
               ),
@@ -308,7 +433,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             children: [
               if (_colorLegendExpanded)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: Wrap(
                     spacing: 4.0,
                     runSpacing: 4.0,
@@ -451,7 +577,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         flex: 3,
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(15, 4, 15, 1),
-                          child: CalculatorKeypad(onKeyPressed: _handleKeyPress),
+                          child:
+                              CalculatorKeypad(onKeyPressed: _handleKeyPress),
                         ),
                       ),
                     ],
@@ -460,8 +587,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ],
           ),
-
-          if (_showChallengeMosaic)
+          if (_activeChallengeType == 'standard')
             Positioned(
               top: 0,
               left: 0,
@@ -478,7 +604,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     children: [
                       const Text(
                         "Desafio Padrão",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       MosaicDisplay(
@@ -499,12 +626,139 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             child: const Text("Fechar"),
                             onPressed: () {
                               setState(() {
-                                _showChallengeMosaic = false;
+                                _activeChallengeType = null;
                               });
                             },
                           ),
                         ],
                       )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (_activeChallengeType == 'soundAndImage')
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Card(
+                color: Colors.white.withOpacity(0.9),
+                margin: const EdgeInsets.all(8.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Desafio Som e Imagem",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      MosaicDisplay(
+                        result: _challengeMosaic,
+                        digitColors: digitColors,
+                        decimalPlaces: 400,
+                        digitsPerRow: 19,
+                        squareSize: 15.0,
+                        currentNoteIndex: null,
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: _isPlayingAudio
+                                ? _toggleAudioPlayback
+                                : _repeatAudio,
+                            icon: Icon(
+                              _isPlayingAudio ? Icons.pause : Icons.replay,
+                            ),
+                            label: Text(
+                              _isPlayingAudio ? "Pausar" : "Reproduzir",
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            child: const Text("Fechar"),
+                            onPressed: () {
+                              setState(() {
+                                _activeChallengeType = null;
+                                _isPlayingAudio =
+                                    false; // Reseta o estado ao fechar
+                                player?.stop(); // Para o áudio
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (_activeChallengeType == 'sound')
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Card(
+                color: Colors.white.withOpacity(0.9),
+                margin: const EdgeInsets.all(8.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Desafio Som (Apenas Áudio)",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      // Botão de Play/Pause
+                      ElevatedButton.icon(
+                        onPressed: _isPlayingAudio
+                            ? _toggleAudioPlayback
+                            : _repeatAudio,
+                        icon: Icon(
+                          _isPlayingAudio ? Icons.pause : Icons.replay,
+                        ),
+                        label: Text(
+                          _isPlayingAudio ? "Pausar" : "Reproduzir",
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            child: const Text("Fechar"),
+                            onPressed: () {
+                              setState(() {
+                                _activeChallengeType = null;
+                                _isPlayingAudio =
+                                    false; // Reseta o estado ao fechar
+                                player?.stop(); // Para o áudio
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -521,16 +775,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _currentNoteIndex = -1;
     });
 
-    
-  if (key == 'save') {
-    if (_controller.display != '0' && _controller.expression != '') {
-      _controller.saveMosaic(
-        _controller.expression,
-        _controller.display,
-        _squareSize,
-        selectedInstrument,
-        _noteDurationMs
-      );
-    }}
+    if (key == 'save') {
+      if (_controller.display != '0' && _controller.expression != '') {
+        _controller.saveMosaic(_controller.expression, _controller.display,
+            _squareSize, selectedInstrument, _noteDurationMs);
+      }
+    }
   }
 }
