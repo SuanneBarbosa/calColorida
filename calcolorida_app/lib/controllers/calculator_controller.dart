@@ -18,9 +18,10 @@ class CalculatorController {
   int _decimalPlaces = 400;
   final int _maxDecimalPlaces = 400;
   bool _isResultDisplayed = false;
-  double _squareSize = 20.0; 
-  int _noteDurationMs = 500; 
+  double _squareSize = 20.0;
+  int _noteDurationMs = 500;
   String _selectedInstrument = 'piano';
+  // bool _ignoreZeros = false;
 
   List<MosaicModel> savedMosaics = [];
 
@@ -29,6 +30,12 @@ class CalculatorController {
   int get noteDurationMs => _noteDurationMs;
   String get selectedInstrument => _selectedInstrument;
   double get squareSize => _squareSize;
+  bool get isResultDisplayed => _isResultDisplayed;
+  // bool get ignoreZeros => _ignoreZeros;
+
+  // set ignoreZeros(bool value) {
+  //   _ignoreZeros = value;
+  // }
 
   set squareSize(double value) {
     _squareSize = value;
@@ -55,17 +62,8 @@ class CalculatorController {
     '9': Colors.cyan,
   };
 
-  void processKey(String key) {
+  void processKey(String key, BuildContext context) {
     if (key == 'save') {
-      // if (_isResultDisplayed) {
-      //   saveMosaic(
-      //     _expression.trim(),
-      //     _display,
-      //     _squareSize,
-      //     selectedInstrument,
-      //     noteDurationMs
-      //   );
-      // }
       return;
     }
     if (_operation.isEmpty &&
@@ -80,27 +78,27 @@ class CalculatorController {
       stopMelody();
       _clear();
     } else if (key == '=') {
-      _calculate();
+      _calculate(context);
     } else if (['+', '-', 'x', '/', '^'].contains(key)) {
-      _setOperation(key);
+      _setOperation(key, context);
       _expression += ' $key ';
     } else if (key == '.') {
       _isResultDisplayed = false;
       _addDecimal();
       _expression += key;
     } else if (key == '√') {
-      _calculateSqrt();
+      _calculateSqrt(context);
       _expression =
           '√(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
     } else if (key == 'π') {
       _insertPi();
       _expression += 'π';
     } else if (key == '1/x') {
-      _calculateInverse();
+      _calculateInverse(context);
       _expression =
           '1/(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})';
     } else if (key == '!') {
-      _calculateFactorial();
+      _calculateFactorial(context);
       _expression =
           '(${_currentNumber.isNotEmpty ? _currentNumber : _result.toString()})!';
     } else if (key == '<-') {
@@ -110,7 +108,6 @@ class CalculatorController {
         _backspace();
         if (_expression.isNotEmpty) {
           _expression = _expression.substring(0, _expression.length - 1);
-          
         }
       }
     } else {
@@ -131,46 +128,59 @@ class CalculatorController {
     _isResultDisplayed = false;
   }
 
-  void _calculate() {
-    if (_operation.isEmpty) return;
-    Decimal secondNumber = Decimal.parse(_currentNumber);
-
-    switch (_operation) {
-      case '+':
-        _result = _result + secondNumber;
-        break;
-      case '-':
-        _result = _result - secondNumber;
-        break;
-      case 'x':
-        _result = _result * secondNumber;
-        break;
-      case '/':
-        if (secondNumber != Decimal.zero) {
-          _result = (_result / secondNumber)
-              .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
-        } else {
-          _display = 'Erro: Divisão por zero';
-          return;
-        }
-        break;
-      case '^':
-        try {
-          int exponent = int.parse(secondNumber.toString()); //mantendo seu código original
-          print("Expoente (int): $exponent");
-          _result = _powDecimal(_result, exponent);
-          print("Resultado da exponenciação: $_result");
-        } catch (e) {
-          _display = 'Erro: Expoente inválido';
-          print("Erro ao converter expoente para inteiro: $e");
-        }
-        break;
+  void _calculate(BuildContext context) {
+    if (_operation.isEmpty) {
+      _showErrorModal(context, "Nenhuma operação foi definida.");
+      return;
     }
-    _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-    _operation = '';
-    // _expression = '';
-    _isResultDisplayed = true;
-    _updateDisplay();
+    if (_currentNumber.isEmpty) {
+      _showErrorModal(context, "Valor nulo ou vazio.");
+      return;
+    }
+
+    try {
+      Decimal secondNumber = Decimal.parse(_currentNumber);
+
+      switch (_operation) {
+        case '+':
+          _result = _result + secondNumber;
+          break;
+        case '-':
+          _result = _result - secondNumber;
+          break;
+        case 'x':
+          _result = _result * secondNumber;
+          break;
+        case '/':
+          if (secondNumber != Decimal.zero) {
+            _result = (_result / secondNumber)
+                .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
+          } else {
+            _showErrorModal(context, "Erro: Divisão por zero.");
+            return;
+          }
+          break;
+        case '^':
+          try {
+            int exponent = int.parse(secondNumber.toString());
+            _result = _powDecimal(_result, exponent);
+          } catch (e) {
+            _showErrorModal(context, 'Erro: Expoente inválido');
+            return;
+          }
+          break;
+        default:
+          _showErrorModal(context, "Operação inválida.");
+          return;
+      }
+
+      _currentNumber = _result.toStringAsFixed(_decimalPlaces);
+      _operation = '';
+      _isResultDisplayed = true;
+      _updateDisplay();
+    } catch (e) {
+      _showErrorModal(context, "Entrada inválida. Verifique os valores.");
+    }
   }
 
   // ignore: unused_field
@@ -192,6 +202,18 @@ class CalculatorController {
     if (_currentNumber.isNotEmpty && _currentNumber.contains('.')) {
       List<String> parts = _currentNumber.split('.');
       String decimalPart = parts[1].replaceAll(RegExp(r'0+$'), '');
+      // String decimalPart = parts[1];
+
+      // Filtra os dígitos com base na configuração ignoreZeros
+    // List<int> digits = decimalPart
+    //     .split('')
+    //     .map(int.parse)
+    //     .where((digit) => !ignoreZeros || digit != 0) // Ignora zeros se ativo
+    //     .toList();
+
+    //     if (maxDigits != null && digits.length > maxDigits) {
+    //   digits = digits.sublist(0, maxDigits);
+    // }
 
       if (maxDigits != null && decimalPart.length > maxDigits) {
         decimalPart = decimalPart.substring(0, maxDigits);
@@ -222,11 +244,11 @@ class CalculatorController {
     await stopAudio();
   }
 
-  void _setOperation(String op) {
+  void _setOperation(String op, BuildContext context) {
     _isResultDisplayed = false;
     if (_currentNumber.isNotEmpty) {
       if (_operation.isNotEmpty) {
-        _calculate();
+        _calculate(context);
       } else {
         try {
           _result = Decimal.parse(_currentNumber);
@@ -266,6 +288,26 @@ class CalculatorController {
     _applyDecimalPlaces();
   }
 
+  // void _updateDisplay() {
+  //   if (_currentNumber.isEmpty) {
+  //     _display = _result.toStringAsFixed(_decimalPlaces);
+  //   } else {
+  //     _display = _currentNumber;
+  //   }
+
+  //   if (_display.endsWith('.')) {
+  //     _display = _display.substring(0, _display.length - 1);
+  //   }
+
+  //   if (_display.contains('.')) {
+  //     _display = _display.replaceAll(RegExp(r'\.?0+$'), '');
+  //   }
+
+  //   if (_display.endsWith('.0')) {
+  //     _display = _display.substring(0, _display.length - 2);
+  //   }
+  // }
+
   void _updateDisplay() {
     if (_currentNumber.isEmpty) {
       _display = _result.toStringAsFixed(_decimalPlaces);
@@ -273,45 +315,44 @@ class CalculatorController {
       _display = _currentNumber;
     }
 
-    if (_display.endsWith('.')) {
-      _display = _display.substring(0, _display.length - 1);
-    }
-
-    if (_display.contains('.')) {
-      _display = _display.replaceAll(RegExp(r'\.?0+$'), '');
-    }
-
-    if (_display.endsWith('.0')) {
-      _display = _display.substring(0, _display.length - 2);
+    // Remove zeros à direita apenas se há números depois do ponto decimal
+    if (_display.contains('.') && !_display.endsWith('.')) {
+      _display = _display.replaceAll(RegExp(r'0+$'), '');
+      if (_display.endsWith('.')) {
+        _display = _display.substring(0, _display.length - 1);
+      }
     }
   }
 
-  void _calculateSqrt() {
-    if (_currentNumber.isNotEmpty) {
-      try {
-        Decimal number = Decimal.parse(_currentNumber);
+  void _calculateSqrt(BuildContext context) {
+    if (_currentNumber.isEmpty) {
+      _showErrorModal(context, "Erro: Valor nulo");
+      return;
+    }
 
-        if (number < Decimal.zero) {
-          _display = 'Erro: Número negativo';
-          return;
-        }
+    try {
+      Decimal number = Decimal.parse(_currentNumber);
 
-        Decimal sqrtResult = _sqrtNewtonRaphson(number, _decimalPlaces);
+      if (number < Decimal.zero) {
+        _showErrorModal(context, "Erro: Número negativo");
 
-        _result = sqrtResult;
-
-        _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-        _isResultDisplayed = true;
-        _updateDisplay();
-      } catch (e) {
-        _display = 'Erro';
+        return;
       }
+
+      Decimal sqrtResult = _sqrtNewtonRaphson(number, _decimalPlaces);
+      _result = sqrtResult;
+      _currentNumber = _result.toStringAsFixed(_decimalPlaces);
+      _isResultDisplayed = true;
+      _updateDisplay();
+    } catch (e) {
+      _showErrorModal(context, "Erro: Entrada Inválida");
     }
   }
 
   Decimal _sqrtNewtonRaphson(Decimal value, int decimalPlaces) {
     if (value < Decimal.zero) {
-      throw ArgumentError('Cannot compute square root of a negative number');
+      throw ArgumentError(
+          'Não é possível calcular a raiz quadrada de um número negativo');
     } else if (value == Decimal.zero) {
       return Decimal.zero;
     }
@@ -358,49 +399,53 @@ class CalculatorController {
     }
   }
 
-  void _calculateInverse() {
-    if (_currentNumber.isNotEmpty) {
-      try {
-        Decimal number = Decimal.parse(_currentNumber);
-        if (number != Decimal.zero) {
-          _result = (Decimal.one / number)
-              .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
-          _currentNumber = _result.toStringAsFixed(_decimalPlaces);
-          _isResultDisplayed = true;
-          _updateDisplay();
-        } else {
-          _display = 'Erro: Divisão por zero';
-        }
-      } catch (e) {
-        _display = 'Erro';
+  void _calculateInverse(BuildContext context) {
+    if (_currentNumber.isEmpty) {
+      _showErrorModal(context, "Erro: Valor Nulo");
+      return;
+    }
+
+    try {
+      Decimal number = Decimal.parse(_currentNumber);
+      if (number != Decimal.zero) {
+        _result = (Decimal.one / number)
+            .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
+        _currentNumber = _result.toStringAsFixed(_decimalPlaces);
+        _isResultDisplayed = true;
+        _updateDisplay();
+      } else {
+        _showErrorModal(context, "Erro: Divisão por zero");
       }
+    } catch (e) {
+      _showErrorModal(context, "Erro: Entrada Inválida");
     }
   }
 
-  void _calculateFactorial() {
-    if (_currentNumber.isNotEmpty) {
-      try {
-        Decimal numberDecimal = Decimal.parse(_currentNumber);
+  void _calculateFactorial(BuildContext context) {
+    if (_currentNumber.isEmpty) {
+      _showErrorModal(context, "Erro: Valor Nulo");
+      return;
+    }
 
-        if ((numberDecimal % Decimal.one) != Decimal.zero) {
-          _display = 'Erro: Entrada não é um inteiro';
-          return;
-        }
-
-        BigInt number = numberDecimal.toBigInt();
-
-        if (number >= BigInt.zero) {
-          BigInt factorialResult = _factorial(number);
-          _result = Decimal.fromBigInt(factorialResult);
-          _currentNumber = _result.toString(); // Fatorial é inteiro
-          _isResultDisplayed = true; // Define o flag como verdadeiro
-          _updateDisplay();
-        } else {
-          _display = 'Erro: Número negativo';
-        }
-      } catch (e) {
-        _display = 'Erro: Entrada inválida';
+    try {
+      Decimal numberDecimal = Decimal.parse(_currentNumber);
+      if ((numberDecimal % Decimal.one) != Decimal.zero) {
+        _showErrorModal(context, "Erro: Entrada não é um inteiro");
+        return;
       }
+
+      BigInt number = numberDecimal.toBigInt();
+      if (number >= BigInt.zero) {
+        BigInt factorialResult = _factorial(number);
+        _result = Decimal.fromBigInt(factorialResult);
+        _currentNumber = _result.toString();
+        _isResultDisplayed = true;
+        _updateDisplay();
+      } else {
+        _showErrorModal(context, "Erro: Número Negativo");
+      }
+    } catch (e) {
+      _showErrorModal(context, "Erro: Entrada Inválida");
     }
   }
 
@@ -431,16 +476,18 @@ class CalculatorController {
 
   Future<void> saveMosaic(String operation, String result, double squareSize,
       String instrument, int noteDurationMs) async {
-      savedMosaics.add(MosaicModel(
+    savedMosaics.add(MosaicModel(
       operation: operation,
-      result: result, 
+      result: result,
       squareSize: squareSize,
       instrument: instrument,
-      noteDurationMs: noteDurationMs,));
+      noteDurationMs: noteDurationMs,
+    ));
     final prefs = await SharedPreferences.getInstance();
     final mosaicList = savedMosaics.map((mosaic) => mosaic.toJson()).toList();
-  await prefs.setStringList('savedMosaics', mosaicList.map((e) => jsonEncode(e)).toList());
-  await saveSettings();
+    await prefs.setStringList(
+        'savedMosaics', mosaicList.map((e) => jsonEncode(e)).toList());
+    await saveSettings();
   }
 
   Future<void> saveSettings() async {
@@ -452,24 +499,26 @@ class CalculatorController {
   }
 
   Future<void> loadSettings() async {
-  _display = await SharedPreferencesService.getResult() ?? "0";
-  _expression = await SharedPreferencesService.getOperation() ?? "";
-  _squareSize = await SharedPreferencesService.getZoom() ?? _squareSize;
-  _selectedInstrument = await SharedPreferencesService.getInstrument() ?? _selectedInstrument;
-  _noteDurationMs = await SharedPreferencesService.getNoteDuration() ?? _noteDurationMs;
-}
+    _display = await SharedPreferencesService.getResult() ?? "0";
+    _expression = await SharedPreferencesService.getOperation() ?? "";
+    _squareSize = await SharedPreferencesService.getZoom() ?? _squareSize;
+    _selectedInstrument =
+        await SharedPreferencesService.getInstrument() ?? _selectedInstrument;
+    _noteDurationMs =
+        await SharedPreferencesService.getNoteDuration() ?? _noteDurationMs;
+  }
 
-Future<void> _saveMosaicsToPreferences() async {
+  Future<void> _saveMosaicsToPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final mosaicList = savedMosaics.map((mosaic) => mosaic.toJson()).toList();
     await prefs.setStringList(
         'savedMosaics', mosaicList.map((e) => jsonEncode(e)).toList());
   }
 
-  void deleteMosaic(int index) async  {
+  void deleteMosaic(int index) async {
     if (index >= 0 && index < savedMosaics.length) {
       savedMosaics.removeAt(index);
-        await _saveMosaicsToPreferences(); // Salva a lista atualizada
+      await _saveMosaicsToPreferences(); // Salva a lista atualizada
     }
   }
 
@@ -482,7 +531,8 @@ Future<void> _saveMosaicsToPreferences() async {
     _isResultDisplayed = true;
     _updateDisplay();
   }
-    Future<void> loadMosaics() async {
+
+  Future<void> loadMosaics() async {
     final prefs = await SharedPreferences.getInstance();
     final mosaicListJson = prefs.getStringList('savedMosaics');
 
@@ -492,5 +542,27 @@ Future<void> _saveMosaicsToPreferences() async {
         return MosaicModel.fromJson(mosaicMap);
       }).toList();
     }
+  }
+
+  //Mensagens de Erro:
+  void _showErrorModal(BuildContext context, String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Impede fechar clicando fora
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Erro"),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o modal
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

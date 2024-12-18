@@ -47,7 +47,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     '9': Colors.cyan,
   };
 
-  
   @override
   void initState() {
     super.initState();
@@ -55,7 +54,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     // _loadPreferences();
     _controller.loadMosaics();
     // initializeAudio();
-
   }
 
   @override
@@ -113,7 +111,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                   // Desafio Padrão
-                  _startStandardChallenge();
+                  _startStandardChallenge(context);
                 },
                 child: const Text("Padrão (Apenas Mosaico)"),
               ),
@@ -122,7 +120,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Navigator.pop(context);
                   // Desafio Som
                   print("Desafio Som selecionado");
-                  _startSoundChallenge();
+                  _startSoundChallenge(context);
                 },
                 child: const Text("Som (Apenas Áudio)"),
               ),
@@ -131,7 +129,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Navigator.pop(context);
                   // Desafio Som e Imagem
                   print("Desafio Som e Imagem selecionado");
-                  _startSoundAndImageChallenge();
+                  _startSoundAndImageChallenge(context);
                 },
                 child: const Text("Som e Imagem"),
               ),
@@ -213,8 +211,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  void _startStandardChallenge() {
-    _controller.processKey('C'); // Limpa a tela antes de iniciar o desafio
+  void _startStandardChallenge(BuildContext context) {
+    _controller.processKey('C',
+        context); // Limpa a tela antes de iniciar o desafio////////////////////////////////////////////////////////////////////////
     _generateChallengeMosaic(); // Gera o número decimal (periódico ou não periódico)
 
     setState(() {
@@ -222,8 +221,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  void _startSoundAndImageChallenge() {
-    _controller.processKey('C'); // Limpa a tela antes de iniciar o desafio
+  void _startSoundAndImageChallenge(BuildContext context) {
+    _controller.processKey('C',
+        context); // Limpa a tela antes de iniciar o desafio //////////////////////////////////////////////////////////////////////////
     _generateChallengeMosaic(); // Gera o número decimal (periódico ou não periódico)
 
     setState(() {
@@ -249,8 +249,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  void _startSoundChallenge() {
-    _controller.processKey('C'); // Limpa a tela antes de iniciar o desafio
+  void _startSoundChallenge(BuildContext context) {
+    _controller.processKey('C',
+        context); // Limpa a tela antes de iniciar o desafio////////////////////////////////////////////////////////////////
     _generateChallengeMosaic();
 
     setState(() {
@@ -392,6 +393,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 );
               },
             ),
+            // ListTile(
+            //   leading: const Icon(Icons.volume_off),
+            //   title: const Text('Pausar som no zero'),
+            //   trailing: Switch(
+            //     value: _controller.ignoreZeros,
+            //     onChanged: (bool value) {
+            //       setState(() {
+            //         _controller.ignoreZeros = value; // Atualiza a opção
+            //       });
+            //     },
+            //   ),
+            // ),
             ListTile(
               leading: const Icon(Icons.flag),
               title: const Text('Desafios'),
@@ -409,14 +422,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     .map<DropdownMenuItem<String>>((String instrument) {
                   return DropdownMenuItem<String>(
                     value: instrument,
-                    child: Text(instrument),
+                    child: Text(
+                        instrumentDisplayNameMap[instrument] ?? instrument),
                   );
                 }).toList(),
                 onChanged: (String? newInstrument) async {
                   if (newInstrument != null) {
                     setState(() {
                       selectedInstrument = newInstrument;
-                      initializeAudio();
                     });
                     await SharedPreferencesService.saveInstrument(
                         newInstrument);
@@ -470,7 +483,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                   padding: const EdgeInsets.all(1.50),
                   child: MosaicDisplay(
-                    result: _controller.display,
+                    result: _controller.isResultDisplayed
+                        ? _controller.display
+                        : '',
                     digitColors: _controller.digitColors,
                     decimalPlaces: _mosaicDecimalPlaces,
                     digitsPerRow: _mosaicDigitsPerRow,
@@ -771,7 +786,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _handleKeyPress(String key) {
     setState(() {
-      _controller.processKey(key);
+      _controller.processKey(key, context);
       _currentNoteIndex = -1;
     });
 

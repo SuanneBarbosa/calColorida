@@ -24,6 +24,21 @@ Map<String, String> instrumentFileNameMap = {
   'violino': 'Violino',
 };
 
+Map<String, String> instrumentDisplayNameMap = {
+  'piano': 'Piano Acústico',
+  'baixo': 'Baixo Elétrico',
+  'banjo': 'Banjo',
+  'flauta': 'Flauta',
+  'flautadoce': 'Flauta Doce',
+  'guitarra': 'Guitarra Elétrica',
+  'orgao': 'Órgão Hammond',
+  'pianoeletrico': 'Piano Elétrico',
+  'sitar': 'Sitar',
+  'trompete': 'Trompete',
+  'violino': 'Violino',
+};
+
+
 StreamSubscription<SequenceState?>? _sequenceStateSubscription;
 StreamSubscription<ProcessingState>? _processingStateSubscription;
 
