@@ -21,6 +21,7 @@ class CalculatorController {
   double _squareSize = 20.0;
   int _noteDurationMs = 500;
   String _selectedInstrument = 'piano';
+  int _mosaicDigitsPerRow = 19;
   // bool _ignoreZeros = false;
 
   List<MosaicModel> savedMosaics = [];
@@ -31,6 +32,7 @@ class CalculatorController {
   String get selectedInstrument => _selectedInstrument;
   double get squareSize => _squareSize;
   bool get isResultDisplayed => _isResultDisplayed;
+  int get mosaicDigitsPerRow => _mosaicDigitsPerRow;
   // bool get ignoreZeros => _ignoreZeros;
 
   // set ignoreZeros(bool value) {
@@ -47,6 +49,10 @@ class CalculatorController {
 
   set noteDurationMs(int value) {
     _noteDurationMs = value;
+  }
+
+  set mosaicDigitsPerRow(int value) {
+    _mosaicDigitsPerRow = value;
   }
 
   Map<String, Color> digitColors = {
@@ -311,13 +317,18 @@ class CalculatorController {
   void _updateDisplay() {
     if (_currentNumber.isEmpty) {
       _display = _result.toStringAsFixed(_decimalPlaces);
+      _display = _display.replaceAll(RegExp(r'0+$'), '');
+      if (_display.endsWith('.')) {
+        _display = _display.substring(0, _display.length - 1);
+      }
     } else {
       _display = _currentNumber;
     }
 
     // Remove zeros à direita apenas se há números depois do ponto decimal
-    if (_display.contains('.') && !_display.endsWith('.')) {
-      _display = _display.replaceAll(RegExp(r'0+$'), '');
+    print(_display);
+    if(_isResultDisplayed) {
+       _display = _display.replaceAll(RegExp(r'0+$'), '');
       if (_display.endsWith('.')) {
         _display = _display.substring(0, _display.length - 1);
       }
@@ -475,13 +486,14 @@ class CalculatorController {
   }
 
   Future<void> saveMosaic(String operation, String result, double squareSize,
-      String instrument, int noteDurationMs) async {
+      String instrument, int noteDurationMs, int mosaicDigitsPerRow) async {
     savedMosaics.add(MosaicModel(
       operation: operation,
       result: result,
       squareSize: squareSize,
       instrument: instrument,
       noteDurationMs: noteDurationMs,
+      mosaicDigitsPerRow: mosaicDigitsPerRow,
     ));
     final prefs = await SharedPreferences.getInstance();
     final mosaicList = savedMosaics.map((mosaic) => mosaic.toJson()).toList();
@@ -496,6 +508,7 @@ class CalculatorController {
     await SharedPreferencesService.saveZoom(squareSize);
     await SharedPreferencesService.saveInstrument(selectedInstrument);
     await SharedPreferencesService.saveNoteDuration(_noteDurationMs);
+    await SharedPreferencesService.saveMosaicDigitsPerRow(_mosaicDigitsPerRow);
   }
 
   Future<void> loadSettings() async {
@@ -506,6 +519,8 @@ class CalculatorController {
         await SharedPreferencesService.getInstrument() ?? _selectedInstrument;
     _noteDurationMs =
         await SharedPreferencesService.getNoteDuration() ?? _noteDurationMs;
+        _mosaicDigitsPerRow = 
+        await SharedPreferencesService.getMosaicDigitsPerRow() ?? _mosaicDigitsPerRow; // Carrega
   }
 
   Future<void> _saveMosaicsToPreferences() async {

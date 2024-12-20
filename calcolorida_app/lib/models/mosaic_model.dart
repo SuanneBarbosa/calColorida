@@ -8,6 +8,7 @@ class MosaicModel {
   final double squareSize;
   final String instrument;
   final int noteDurationMs;
+  final int mosaicDigitsPerRow;
 
   MosaicModel({
     required this.operation,
@@ -15,6 +16,7 @@ class MosaicModel {
     required this.squareSize,
     required this.instrument,
     required this.noteDurationMs,
+    required this.mosaicDigitsPerRow,
   });
 
   Map<String, dynamic> toJson() => {
@@ -23,6 +25,7 @@ class MosaicModel {
         'squareSize': squareSize,
         'instrument': instrument,
         'noteDurationMs': noteDurationMs,
+        'mosaicDigitsPerRow': mosaicDigitsPerRow,
       };
 
   factory MosaicModel.fromJson(Map<String, dynamic> json) => MosaicModel(
@@ -31,5 +34,6 @@ class MosaicModel {
         squareSize: json['squareSize'],
         instrument: json['instrument'],
         noteDurationMs: json['noteDurationMs'],
+        mosaicDigitsPerRow: json['mosaicDigitsPerRow'],
       );
 }

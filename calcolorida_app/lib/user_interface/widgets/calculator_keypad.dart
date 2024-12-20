@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class CalculatorKeypad extends StatelessWidget {
   final Function(String) onKeyPressed;
 
-  const CalculatorKeypad({Key? key, required this.onKeyPressed})
-      : super(key: key);
+  const CalculatorKeypad({super.key, required this.onKeyPressed});
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ class MosaicDisplay extends StatefulWidget {
   final Function(int)? onMaxDigitsCalculated;
 
   const MosaicDisplay({
-    Key? key,
+    super.key,
     required this.result,
     required this.digitColors,
     required this.decimalPlaces,
@@ -20,7 +20,7 @@ class MosaicDisplay extends StatefulWidget {
     this.currentNoteIndex,
     this.onNoteTap,
     this.onMaxDigitsCalculated,
-  }) : super(key: key);
+  });
 
   @override
   _MosaicDisplayState createState() => _MosaicDisplayState();

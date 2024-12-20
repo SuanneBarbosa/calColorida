@@ -9,8 +9,7 @@ class SavedMosaicsScreen extends StatefulWidget {
   final VoidCallback? onMosaicApplied;
 
   const SavedMosaicsScreen(
-      {Key? key, required this.controller, this.onMosaicApplied})
-      : super(key: key);
+      {super.key, required this.controller, this.onMosaicApplied});
 
   @override
   _SavedMosaicsScreenState createState() => _SavedMosaicsScreenState();
@@ -37,9 +36,9 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
   @override
   Widget build(BuildContext context) {
     final Map<String, Color> digitColors = widget.controller.digitColors;
-    final int decimalPlaces = 400;
-    final int digitsPerRow = 40;
-    final double squareSize = 10.0;
+    const int decimalPlaces = 400;
+    const int digitsPerRow = 40;
+    const double squareSize = 10.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -160,6 +159,11 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
   widget.controller.squareSize = mosaic.squareSize;
   widget.controller.selectedInstrument = mosaic.instrument;
   widget.controller.noteDurationMs = mosaic.noteDurationMs;
+  widget.controller.mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
+
+  // setState(() {
+  //   _mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
+  // });
 
     await widget.controller.saveSettings();
 

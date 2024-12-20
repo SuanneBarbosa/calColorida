@@ -7,6 +7,7 @@ import '../screens/saved_mosaics_screen.dart';
 import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
+import '../screens/responsive_calculator_screen.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -19,7 +20,7 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   late CalculatorController _controller;
   final int _mosaicDecimalPlaces = 400;
-  int _mosaicDigitsPerRow = 19;
+   int _mosaicDigitsPerRow = 19;
   double _squareSize = 20.0;
   final double _minSquareSize = 10.0;
   final double _maxSquareSize = 50.0;
@@ -29,10 +30,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   bool _isPlaying = false;
   int _maxDigitsInMosaic = 0;
   // ignore: unused_field
-  bool _showChallengeMosaic = false;
+  final bool _showChallengeMosaic = false;
   String _challengeMosaic = "";
   String? _activeChallengeType;
   bool _isPlayingAudio = false;
+
 
   final Map<String, Color> digitColors = {
     '0': Colors.red,
@@ -70,6 +72,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final result = await SharedPreferencesService.getResult();
     final operation = await SharedPreferencesService.getOperation();
     final duration = await SharedPreferencesService.getNoteDuration();
+    final mosaicDigitsPerRow = await SharedPreferencesService.getMosaicDigitsPerRow();
 
     setState(() {
       _squareSize = zoom ?? 20.0;
@@ -86,6 +89,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
       if (duration != null) {
         _noteDurationMs = duration;
+      }
+      if (mosaicDigitsPerRow != null) {
+        _mosaicDigitsPerRow = mosaicDigitsPerRow;
+        _controller.mosaicDigitsPerRow = mosaicDigitsPerRow;
       }
     });
   }
@@ -428,11 +435,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 }).toList(),
                 onChanged: (String? newInstrument) async {
                   if (newInstrument != null) {
+                    print("Instrumento selecionado: $newInstrument");
                     setState(() {
                       selectedInstrument = newInstrument;
                     });
                     await SharedPreferencesService.saveInstrument(
                         newInstrument);
+                    await initializeAudio();
+                    print(
+                        "Audio reinicializado para o instrumento: $newInstrument");
                   }
                 },
               ),
@@ -514,14 +525,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ),
                     Expanded(
                       child: Slider(
-                        value: _mosaicDigitsPerRow.toDouble(),
+                        value: _controller.mosaicDigitsPerRow.toDouble(),
                         min: 1,
                         max: 40,
-                        label: _mosaicDigitsPerRow.toString(),
-                        onChanged: (double value) {
+                        label: _controller.mosaicDigitsPerRow.toString(),
+                        onChanged: (double value) async {
                           setState(() {
                             _mosaicDigitsPerRow = value.toInt();
+                            _controller.mosaicDigitsPerRow = value.toInt();
+                            print("Valor do Slider alterado para: ${_controller.mosaicDigitsPerRow}");
                           });
+                          await SharedPreferencesService.saveMosaicDigitsPerRow(value.toInt());
                         },
                       ),
                     ),
@@ -627,7 +641,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         result: _challengeMosaic,
                         digitColors: digitColors,
                         decimalPlaces: 400,
-                        digitsPerRow: 19,
+                        digitsPerRow: _mosaicDigitsPerRow,
                         squareSize: 15.0,
                         currentNoteIndex: null,
                         onNoteTap: null,
@@ -793,7 +807,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (key == 'save') {
       if (_controller.display != '0' && _controller.expression != '') {
         _controller.saveMosaic(_controller.expression, _controller.display,
-            _squareSize, selectedInstrument, _noteDurationMs);
+            _squareSize, selectedInstrument, _noteDurationMs, _mosaicDigitsPerRow);
       }
     }
   }

@@ -6,6 +6,18 @@ class SharedPreferencesService {
   static const String keyInstrument = "key_instrument";
   static const String keyZoom = "key_zoom";
   static const String keyNoteDuration = "key_note_duration";
+  static const String keyMosaicDigitsPerRow = "key_mosaic_digits_per_row";
+
+static Future<void> saveMosaicDigitsPerRow(int digitsPerRow) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt(keyMosaicDigitsPerRow, digitsPerRow);
+}
+
+static Future<int?> getMosaicDigitsPerRow() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt(keyMosaicDigitsPerRow);
+}
+
 
   static Future<void> saveResult(String result) async {
     final prefs = await SharedPreferences.getInstance();

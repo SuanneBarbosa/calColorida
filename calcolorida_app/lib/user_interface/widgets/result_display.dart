@@ -7,12 +7,12 @@ class ResultDisplay extends StatefulWidget {
   final String operation;
 
   const ResultDisplay({
-    Key? key,
+    super.key,
     required this.display,
     required this.operation,
     this.currentNoteIndex,
     required this.digitColors,
-  }) : super(key: key);
+  });
 
   @override
   _ResultDisplayState createState() => _ResultDisplayState();
@@ -75,7 +75,7 @@ class _ResultDisplayState extends State<ResultDisplay> {
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             blurRadius: 4,
-            offset: Offset(2, 4),
+            offset: const Offset(2, 4),
           ),
         ],
       ),

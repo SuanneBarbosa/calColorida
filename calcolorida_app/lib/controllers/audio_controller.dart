@@ -78,7 +78,7 @@ Future<void> initializeAudio() async {
       String audioPath = 'assets/sounds/$selectedInstrument/${note}_$fileNamePrefix.mp3';
       print("Carregando arquivo de áudio: $audioPath");
 
-      UriAudioSource source = AudioSource.asset(audioPath) as UriAudioSource;
+      UriAudioSource source = AudioSource.asset(audioPath);
       digitToAudioSource[digit] = source;
     }
   } catch (e) {
