@@ -69,6 +69,12 @@ class CalculatorController {
   };
 
   void processKey(String key, BuildContext context) {
+    const operations = ['+', '-', 'x', '/', '^'];
+    bool isLastCharOperation() {
+      if (_expression.isEmpty) return false;
+      return operations.contains(_expression.trim().split('').last);
+    }
+
     if (key == 'save') {
       return;
     }
@@ -85,7 +91,11 @@ class CalculatorController {
       _clear();
     } else if (key == '=') {
       _calculate(context);
-    } else if (['+', '-', 'x', '/', '^'].contains(key)) {
+    } else if (operations.contains(key)) {
+      if (isLastCharOperation()) {
+      return; // Ignora a entrada
+    }
+      
       _setOperation(key, context);
       _expression += ' $key ';
     } else if (key == '.') {
@@ -211,15 +221,15 @@ class CalculatorController {
       // String decimalPart = parts[1];
 
       // Filtra os dígitos com base na configuração ignoreZeros
-    // List<int> digits = decimalPart
-    //     .split('')
-    //     .map(int.parse)
-    //     .where((digit) => !ignoreZeros || digit != 0) // Ignora zeros se ativo
-    //     .toList();
+      // List<int> digits = decimalPart
+      //     .split('')
+      //     .map(int.parse)
+      //     .where((digit) => !ignoreZeros || digit != 0) // Ignora zeros se ativo
+      //     .toList();
 
-    //     if (maxDigits != null && digits.length > maxDigits) {
-    //   digits = digits.sublist(0, maxDigits);
-    // }
+      //     if (maxDigits != null && digits.length > maxDigits) {
+      //   digits = digits.sublist(0, maxDigits);
+      // }
 
       if (maxDigits != null && decimalPart.length > maxDigits) {
         decimalPart = decimalPart.substring(0, maxDigits);
@@ -327,8 +337,8 @@ class CalculatorController {
 
     // Remove zeros à direita apenas se há números depois do ponto decimal
     print(_display);
-    if(_isResultDisplayed) {
-       _display = _display.replaceAll(RegExp(r'0+$'), '');
+    if (_isResultDisplayed) {
+      _display = _display.replaceAll(RegExp(r'0+$'), '');
       if (_display.endsWith('.')) {
         _display = _display.substring(0, _display.length - 1);
       }
@@ -519,8 +529,9 @@ class CalculatorController {
         await SharedPreferencesService.getInstrument() ?? _selectedInstrument;
     _noteDurationMs =
         await SharedPreferencesService.getNoteDuration() ?? _noteDurationMs;
-        _mosaicDigitsPerRow = 
-        await SharedPreferencesService.getMosaicDigitsPerRow() ?? _mosaicDigitsPerRow; // Carrega
+    _mosaicDigitsPerRow =
+        await SharedPreferencesService.getMosaicDigitsPerRow() ??
+            _mosaicDigitsPerRow; // Carrega
   }
 
   Future<void> _saveMosaicsToPreferences() async {
@@ -582,7 +593,6 @@ class CalculatorController {
   }
 
   bool hasActiveMosaic() {
-  return _isResultDisplayed && _display.contains('.');
-}
-
+    return _isResultDisplayed && _display.contains('.');
+  }
 }

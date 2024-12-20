@@ -20,7 +20,7 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   late CalculatorController _controller;
   final int _mosaicDecimalPlaces = 400;
-   int _mosaicDigitsPerRow = 19;
+  int _mosaicDigitsPerRow = 19;
   double _squareSize = 20.0;
   final double _minSquareSize = 10.0;
   final double _maxSquareSize = 50.0;
@@ -34,7 +34,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String _challengeMosaic = "";
   String? _activeChallengeType;
   bool _isPlayingAudio = false;
-
 
   final Map<String, Color> digitColors = {
     '0': Colors.red,
@@ -72,7 +71,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final result = await SharedPreferencesService.getResult();
     final operation = await SharedPreferencesService.getOperation();
     final duration = await SharedPreferencesService.getNoteDuration();
-    final mosaicDigitsPerRow = await SharedPreferencesService.getMosaicDigitsPerRow();
+    final mosaicDigitsPerRow =
+        await SharedPreferencesService.getMosaicDigitsPerRow();
 
     setState(() {
       _squareSize = zoom ?? 20.0;
@@ -317,16 +317,33 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            const DrawerHeader(
-              decoration: BoxDecoration(
+            DrawerHeader(
+              decoration: const BoxDecoration(
                 color: Colors.blue,
               ),
-              child: Text(
-                'MusicalColorida',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Stack(
+                children: [
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'MusicalColorida',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () {
+                        Navigator.pop(context); // Fecha o Drawer
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
@@ -533,9 +550,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           setState(() {
                             _mosaicDigitsPerRow = value.toInt();
                             _controller.mosaicDigitsPerRow = value.toInt();
-                            print("Valor do Slider alterado para: ${_controller.mosaicDigitsPerRow}");
+                            print(
+                                "Valor do Slider alterado para: ${_controller.mosaicDigitsPerRow}");
                           });
-                          await SharedPreferencesService.saveMosaicDigitsPerRow(value.toInt());
+                          await SharedPreferencesService.saveMosaicDigitsPerRow(
+                              value.toInt());
                         },
                       ),
                     ),
@@ -805,24 +824,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
 
     if (key == 'save') {
-    if (_controller.hasActiveMosaic()) {
-      _controller.saveMosaic(
-        _controller.expression,
-        _controller.display,
-        _squareSize,
-        selectedInstrument,
-        _noteDurationMs,
-        _mosaicDigitsPerRow,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mosaico salvo com sucesso!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nenhum mosaico na tela para salvar.')),
-      );
+      if (_controller.hasActiveMosaic()) {
+        _controller.saveMosaic(
+          _controller.expression,
+          _controller.display,
+          _squareSize,
+          selectedInstrument,
+          _noteDurationMs,
+          _mosaicDigitsPerRow,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mosaico salvo com sucesso!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nenhum mosaico na tela para salvar.')),
+        );
+      }
     }
-  }
-
   }
 }

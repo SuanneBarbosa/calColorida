@@ -62,14 +62,6 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         ListTile(
-                          title: Text(
-                            'Operação: ${mosaic.operation}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.blueAccent,
-                            ),
-                          ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -103,13 +95,23 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                             result: mosaic.result,
                             digitColors: digitColors,
                             decimalPlaces: decimalPlaces,
-                            digitsPerRow:  mosaic.mosaicDigitsPerRow,
+                            digitsPerRow: mosaic.mosaicDigitsPerRow,
                             squareSize: squareSize,
                             currentNoteIndex: _currentPlayingIndex == index
                                 ? _currentNoteIndex
                                 : null,
                             onNoteTap: null,
                             onMaxDigitsCalculated: null,
+                          ),
+                        ),
+                        ListTile(
+                          title: Text(
+                            'Operação: ${mosaic.operation}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.blueAccent,
+                            ),
                           ),
                         ),
                       ],
@@ -153,23 +155,22 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
     );
   }
 
- void _applySavedMosaic(MosaicModel mosaic) async {
+  void _applySavedMosaic(MosaicModel mosaic) async {
+    widget.controller.loadMosaic(mosaic.operation, mosaic.result);
+    widget.controller.squareSize = mosaic.squareSize;
+    widget.controller.selectedInstrument = mosaic.instrument;
+    widget.controller.noteDurationMs = mosaic.noteDurationMs;
+    widget.controller.mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
 
-  widget.controller.loadMosaic(mosaic.operation, mosaic.result);
-  widget.controller.squareSize = mosaic.squareSize;
-  widget.controller.selectedInstrument = mosaic.instrument;
-  widget.controller.noteDurationMs = mosaic.noteDurationMs;
-  widget.controller.mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
-
-  // setState(() {
-  //   _mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
-  // });
+    // setState(() {
+    //   _mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
+    // });
 
     await widget.controller.saveSettings();
 
-  widget.onMosaicApplied?.call();
-  Navigator.pop(context);
+    widget.onMosaicApplied?.call();
+    Navigator.pop(context);
 
- await initializeAudio();
-}
+    await initializeAudio();
+  }
 }
