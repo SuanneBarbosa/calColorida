@@ -580,4 +580,9 @@ class CalculatorController {
       },
     );
   }
+
+  bool hasActiveMosaic() {
+  return _isResultDisplayed && _display.contains('.');
+}
+
 }

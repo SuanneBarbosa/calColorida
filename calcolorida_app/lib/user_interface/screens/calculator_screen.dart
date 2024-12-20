@@ -7,7 +7,7 @@ import '../screens/saved_mosaics_screen.dart';
 import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
-import '../screens/responsive_calculator_screen.dart';
+// import '../screens/responsive_calculator_screen.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -805,10 +805,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
 
     if (key == 'save') {
-      if (_controller.display != '0' && _controller.expression != '') {
-        _controller.saveMosaic(_controller.expression, _controller.display,
-            _squareSize, selectedInstrument, _noteDurationMs, _mosaicDigitsPerRow);
-      }
+    if (_controller.hasActiveMosaic()) {
+      _controller.saveMosaic(
+        _controller.expression,
+        _controller.display,
+        _squareSize,
+        selectedInstrument,
+        _noteDurationMs,
+        _mosaicDigitsPerRow,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mosaico salvo com sucesso!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhum mosaico na tela para salvar.')),
+      );
     }
+  }
+
   }
 }

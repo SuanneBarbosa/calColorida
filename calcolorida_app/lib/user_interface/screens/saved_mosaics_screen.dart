@@ -37,7 +37,7 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
   Widget build(BuildContext context) {
     final Map<String, Color> digitColors = widget.controller.digitColors;
     const int decimalPlaces = 400;
-    const int digitsPerRow = 40;
+    // const int digitsPerRow = 40;
     const double squareSize = 10.0;
 
     return Scaffold(
@@ -103,7 +103,7 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                             result: mosaic.result,
                             digitColors: digitColors,
                             decimalPlaces: decimalPlaces,
-                            digitsPerRow: digitsPerRow,
+                            digitsPerRow:  mosaic.mosaicDigitsPerRow,
                             squareSize: squareSize,
                             currentNoteIndex: _currentPlayingIndex == index
                                 ? _currentNoteIndex
