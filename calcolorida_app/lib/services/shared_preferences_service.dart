@@ -1,3 +1,4 @@
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesService {
@@ -67,5 +68,8 @@ static Future<void> saveNoteDuration(int duration) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(keyNoteDuration);
   }
+
+ 
+
 
 }

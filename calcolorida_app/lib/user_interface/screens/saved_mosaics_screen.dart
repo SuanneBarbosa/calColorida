@@ -56,7 +56,11 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
               itemBuilder: (context, index) {
                 final mosaic = widget.controller.savedMosaics[index];
                 return Padding(
-                  padding: const EdgeInsets.all(2.0),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                color: mosaic.isFixed
+                    ? Colors.blue.shade50
+                    : Colors.white, // Cor diferente para mosaicos fixos
                   child: Card(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -76,15 +80,18 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                                   style: TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 17,
                                   ),
                                 ),
                               ),
                               IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  _confirmDeletion(index);
-                                },
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.red, size: 30),
+                                onPressed: mosaic.isFixed
+                                    ? null // Desabilita exclusão de mosaicos fixos
+                                    : () {
+                                        _confirmDeletion(index);
+                                      },
                               ),
                             ],
                           ),
@@ -109,13 +116,14 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                             'Operação: ${mosaic.operation}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                              fontSize: 20,
                               color: Colors.blueAccent,
                             ),
                           ),
                         ),
                       ],
                     ),
+                  ),
                   ),
                 );
               },

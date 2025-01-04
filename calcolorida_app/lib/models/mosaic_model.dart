@@ -9,6 +9,7 @@ class MosaicModel {
   final String instrument;
   final int noteDurationMs;
   final int mosaicDigitsPerRow;
+  final bool isFixed; // Novo campo para diferenciar mosaicos fixos
 
   MosaicModel({
     required this.operation,
@@ -17,6 +18,7 @@ class MosaicModel {
     required this.instrument,
     required this.noteDurationMs,
     required this.mosaicDigitsPerRow,
+     this.isFixed = false, // Padrão: mosaico não é fixo
   });
 
   Map<String, dynamic> toJson() => {
@@ -26,6 +28,7 @@ class MosaicModel {
         'instrument': instrument,
         'noteDurationMs': noteDurationMs,
         'mosaicDigitsPerRow': mosaicDigitsPerRow,
+        'isFixed': isFixed, // Inclui a propriedade no JSON
       };
 
   factory MosaicModel.fromJson(Map<String, dynamic> json) => MosaicModel(
@@ -35,5 +38,6 @@ class MosaicModel {
         instrument: json['instrument'],
         noteDurationMs: json['noteDurationMs'],
         mosaicDigitsPerRow: json['mosaicDigitsPerRow'],
+        isFixed: json['isFixed'] ?? false, // Valor padrão ao carregar
       );
 }

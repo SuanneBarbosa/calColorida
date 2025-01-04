@@ -22,7 +22,13 @@ class CalculatorController {
   int _noteDurationMs = 500;
   String _selectedInstrument = 'piano';
   int _mosaicDigitsPerRow = 19;
-  // bool _ignoreZeros = false;
+  bool _ignoreZeros = false;
+  bool get ignoreZeros => _ignoreZeros;
+
+  set ignoreZeros(bool value) {
+    _ignoreZeros = value;
+  }
+
 
   List<MosaicModel> savedMosaics = [];
 
@@ -172,7 +178,7 @@ class CalculatorController {
             _result = (_result / secondNumber)
                 .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
           } else {
-            _showErrorModal(context, "Erro: Divisão por zero.");
+            _showErrorModal(context, "Não é possível dividir por zero.");
             return;
           }
           break;
@@ -181,7 +187,7 @@ class CalculatorController {
             int exponent = int.parse(secondNumber.toString());
             _result = _powDecimal(_result, exponent);
           } catch (e) {
-            _showErrorModal(context, 'Erro: Expoente inválido');
+            _showErrorModal(context, 'Expoente inválido');
             return;
           }
           break;
@@ -218,35 +224,61 @@ class CalculatorController {
     if (_currentNumber.isNotEmpty && _currentNumber.contains('.')) {
       List<String> parts = _currentNumber.split('.');
       String decimalPart = parts[1].replaceAll(RegExp(r'0+$'), '');
-      // String decimalPart = parts[1];
 
-      // Filtra os dígitos com base na configuração ignoreZeros
-      // List<int> digits = decimalPart
-      //     .split('')
-      //     .map(int.parse)
-      //     .where((digit) => !ignoreZeros || digit != 0) // Ignora zeros se ativo
-      //     .toList();
+      List<int> digitsToPlay = []; 
 
-      //     if (maxDigits != null && digits.length > maxDigits) {
-      //   digits = digits.sublist(0, maxDigits);
-      // }
-
-      if (maxDigits != null && decimalPart.length > maxDigits) {
-        decimalPart = decimalPart.substring(0, maxDigits);
+      if (_ignoreZeros) {
+        digitsToPlay = decimalPart.split('').map(int.parse).where((digit) => digit != 0).toList();
+      } else {
+        digitsToPlay = decimalPart.split('').map(int.parse).toList();
       }
 
-      List<int> digits = decimalPart.split('').map(int.parse).toList();
-
-      if (digits.isEmpty) {
+      if (digitsToPlay.isEmpty) {
         print("Nenhum dígito para reproduzir após o ponto decimal.");
         return;
       }
 
+      List<int> originalDigits = decimalPart.split('').map(int.parse).toList();
+
+
+      if (maxDigits != null && decimalPart.length > maxDigits) {
+        decimalPart = decimalPart.substring(0, maxDigits);
+
+        if (_ignoreZeros) {
+           digitsToPlay = digitsToPlay.sublist(0, maxDigits);
+        } else {
+           digitsToPlay = digitsToPlay.sublist(0, maxDigits); //ou original digits, se necessário.
+        }
+
+      }
+
       try {
         await playMelodyAudio(
-          digits: digits,
+          digits: digitsToPlay,
           durationMs: durationMs,
-          onNoteStarted: onNoteStarted,
+          onNoteStarted: (noteIndex) {
+            if (onNoteStarted != null) {
+              int originalIndex = 0;
+              if(_ignoreZeros){
+                int nonZeroCount = 0;
+                for(int i =0; i<originalDigits.length; i++){
+                    if(originalDigits[i]!=0){
+                        if(nonZeroCount == noteIndex){
+                          originalIndex = i;
+                          break;
+                        }
+                         nonZeroCount++;
+                    }
+
+                }
+
+              }else{
+                 originalIndex = noteIndex;
+              }
+
+                onNoteStarted(originalIndex);
+            }
+          },
           onNoteFinished: onNoteFinished,
         );
       } catch (e) {
@@ -254,6 +286,10 @@ class CalculatorController {
       }
     }
   }
+
+  
+
+
 
   Future<void> stopMelody() async {
     stopPlayback();
@@ -347,7 +383,7 @@ class CalculatorController {
 
   void _calculateSqrt(BuildContext context) {
     if (_currentNumber.isEmpty) {
-      _showErrorModal(context, "Erro: Valor nulo");
+      _showErrorModal(context, "Valor nulo.");
       return;
     }
 
@@ -355,7 +391,7 @@ class CalculatorController {
       Decimal number = Decimal.parse(_currentNumber);
 
       if (number < Decimal.zero) {
-        _showErrorModal(context, "Erro: Número negativo");
+        _showErrorModal(context, "Número negativo.");
 
         return;
       }
@@ -366,7 +402,7 @@ class CalculatorController {
       _isResultDisplayed = true;
       _updateDisplay();
     } catch (e) {
-      _showErrorModal(context, "Erro: Entrada Inválida");
+      _showErrorModal(context, "Erro: Entrada Inválida.");
     }
   }
 
@@ -422,7 +458,7 @@ class CalculatorController {
 
   void _calculateInverse(BuildContext context) {
     if (_currentNumber.isEmpty) {
-      _showErrorModal(context, "Erro: Valor Nulo");
+      _showErrorModal(context, "Erro: Valor Nulo.");
       return;
     }
 
@@ -435,23 +471,23 @@ class CalculatorController {
         _isResultDisplayed = true;
         _updateDisplay();
       } else {
-        _showErrorModal(context, "Erro: Divisão por zero");
+        _showErrorModal(context, "Erro: Divisão por zero.");
       }
     } catch (e) {
-      _showErrorModal(context, "Erro: Entrada Inválida");
+      _showErrorModal(context, "Erro: Entrada Inválida.");
     }
   }
 
   void _calculateFactorial(BuildContext context) {
     if (_currentNumber.isEmpty) {
-      _showErrorModal(context, "Erro: Valor Nulo");
+      _showErrorModal(context, "Erro: Valor Nulo.");
       return;
     }
 
     try {
       Decimal numberDecimal = Decimal.parse(_currentNumber);
       if ((numberDecimal % Decimal.one) != Decimal.zero) {
-        _showErrorModal(context, "Erro: Entrada não é um inteiro");
+        _showErrorModal(context, "Erro: Entrada não é um inteiro.");
         return;
       }
 
@@ -463,7 +499,7 @@ class CalculatorController {
         _isResultDisplayed = true;
         _updateDisplay();
       } else {
-        _showErrorModal(context, "Erro: Número Negativo");
+        _showErrorModal(context, "Erro: Número Negativo.");
       }
     } catch (e) {
       _showErrorModal(context, "Erro: Entrada Inválida");
@@ -471,7 +507,7 @@ class CalculatorController {
   }
 
   BigInt _factorial(BigInt n) {
-    if (n < BigInt.zero) throw ArgumentError('Número negativo não permitido');
+    if (n < BigInt.zero) throw ArgumentError('Número negativo não permitido.');
     BigInt result = BigInt.one;
     for (BigInt i = BigInt.one; i <= n; i = i + BigInt.one) {
       result *= i;
@@ -558,7 +594,34 @@ class CalculatorController {
     _updateDisplay();
   }
 
+   void loadFixedMosaics() {
+  final fixedMosaics = [
+    MosaicModel(
+      operation: "10228 / 99999",
+      result: "0.1022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228102281022810228",
+      squareSize: 20.0,
+      instrument: "piano",
+      noteDurationMs: 500,
+      mosaicDigitsPerRow: 20,
+      isFixed: true,
+    ),
+    
+    MosaicModel(
+      operation: "7 / 8",
+      result: "1.1428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428571428",
+      squareSize: 20.0,
+      instrument: "violino",
+      noteDurationMs: 500,
+      mosaicDigitsPerRow: 19,
+      isFixed: true,
+    ),
+  ];
+
+  savedMosaics.insertAll(0, fixedMosaics);
+}
+
   Future<void> loadMosaics() async {
+     loadFixedMosaics(); // Carrega os mosaicos fixos primeiro
     final prefs = await SharedPreferences.getInstance();
     final mosaicListJson = prefs.getStringList('savedMosaics');
 
@@ -577,7 +640,7 @@ class CalculatorController {
       barrierDismissible: false, // Impede fechar clicando fora
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Erro"),
+          title: const Text("Verifique o Erro."),
           content: Text(errorMessage),
           actions: [
             TextButton(
