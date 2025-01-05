@@ -113,58 +113,53 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         return Container(
           padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.center, 
-            crossAxisAlignment:
-                CrossAxisAlignment.center, 
-            mainAxisSize:
-                MainAxisSize.min, 
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
                 "Escolha um Desafio",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue, 
+                  color: Colors.blue,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20), 
+              const SizedBox(height: 20),
               const Divider(),
-              const SizedBox(height: 20), 
+              const SizedBox(height: 20),
               SizedBox(
-                width: 400, 
+                width: 400,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, 
+                    backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(10), 
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onPressed: () {
                     Navigator.pop(context);
-                    
+
                     _startStandardChallenge(context);
                   },
                   child: const Text(
                     "Mosaico ",
                     style: TextStyle(
                       fontSize: 20,
-                      color: Colors.white, 
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 10),
               SizedBox(
-                width: 400, 
+                width: 400,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, 
+                    backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(10), 
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onPressed: () {
@@ -175,20 +170,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     "Som ",
                     style: TextStyle(
                       fontSize: 20,
-                      color: Colors.white, 
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 10), 
+              const SizedBox(height: 10),
               SizedBox(
-                width: 400, 
+                width: 400,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, 
+                    backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(10), 
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onPressed: () {
@@ -199,7 +193,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     "Som e Mosaico",
                     style: TextStyle(
                       fontSize: 20,
-                      color: Colors.white, 
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -210,16 +204,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       },
     );
   }
+
 //Gerador de Desafio
   void _generateChallengeMosaic() {
     final rand = Random();
-    const length = 247; // 
+    const length = 247; //
     String randomMosaic = "";
     bool isPeriodic = rand.nextBool();
 
     if (isPeriodic) {
-      int periodLength =
-          rand.nextInt(5) + 1; 
+      int periodLength = rand.nextInt(5) + 1;
       String period = "";
       for (int i = 0; i < periodLength; i++) {
         period += rand.nextInt(10).toString();
@@ -227,8 +221,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       while (randomMosaic.length < length) {
         randomMosaic += period;
       }
-      randomMosaic =
-          randomMosaic.substring(0, length); 
+      randomMosaic = randomMosaic.substring(0, length);
     } else {
       for (int i = 0; i < length; i++) {
         randomMosaic += rand.nextInt(10).toString();
@@ -264,35 +257,34 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       onNoteFinished: (noteIndex) {},
       onPlaybackCompleted: () {
         setState(() {
-          _isPlayingAudio = false; 
+          _isPlayingAudio = false;
         });
       },
     );
 
     setState(() {
-      _isPlayingAudio = true; 
+      _isPlayingAudio = true;
     });
   }
 
   void _startStandardChallenge(BuildContext context) {
     _controller.processKey('C', context);
-    _generateChallengeMosaic(); 
+    _generateChallengeMosaic();
 
     setState(() {
-      _activeChallengeType = 'standard'; 
+      _activeChallengeType = 'standard';
     });
   }
 
   void _startSoundAndImageChallenge(BuildContext context) {
     _controller.processKey('C', context);
-    _generateChallengeMosaic(); 
+    _generateChallengeMosaic();
 
     setState(() {
       _activeChallengeType = 'soundAndImage';
-      _isPlayingAudio = true; 
+      _isPlayingAudio = true;
     });
 
-   
     String decimalPart = _challengeMosaic.split('.')[1];
     List<int> digits = decimalPart.split('').map(int.parse).toList();
 
@@ -304,8 +296,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       onNoteFinished: (noteIndex) {},
       onPlaybackCompleted: () {
         setState(() {
-          _isPlayingAudio =
-              false; 
+          _isPlayingAudio = false;
         });
       },
     );
@@ -317,7 +308,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     setState(() {
       _activeChallengeType = 'sound';
-      _isPlayingAudio = true; 
+      _isPlayingAudio = true;
     });
 
     String decimalPart = _challengeMosaic.split('.')[1];
@@ -329,7 +320,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       delayMs: 0,
       onPlaybackCompleted: () {
         setState(() {
-          _isPlayingAudio = false; 
+          _isPlayingAudio = false;
         });
       },
     );
@@ -381,29 +372,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30.0),
                       child: Container(
-                        padding:
-                            const EdgeInsets.all(10.0), 
+                        padding: const EdgeInsets.all(10.0),
                         decoration: BoxDecoration(
-                          color: Colors.white, 
-                          borderRadius:
-                              BorderRadius.circular(15), 
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
                           boxShadow: [
                             BoxShadow(
-                              color:
-                                  Colors.black.withOpacity(0.2), 
+                              color: Colors.black.withOpacity(0.2),
                               blurRadius: 8,
                               offset: const Offset(2, 4),
                             ),
                           ],
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment
-                              .center,
-                          crossAxisAlignment: CrossAxisAlignment
-                              .center, 
-
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            
                             Image.asset(
                               'assets/images/IFSP_Logo.png',
                               height: 70,
@@ -412,21 +396,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             const SizedBox(
                               width: 5,
                             ),
-                            
                             Image.asset(
                               'assets/images/CNPQ_Logo.png',
-                              height:
-                                  70, 
+                              height: 70,
                               fit: BoxFit.contain,
                             ),
-                            const SizedBox(
-                                width:
-                                    5), 
-                            
+                            const SizedBox(width: 5),
                             Image.asset(
                               'assets/images/RUMO_Logo.png',
-                              height:
-                                  70, 
+                              height: 70,
                               fit: BoxFit.contain,
                             ),
                           ],
@@ -440,15 +418,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     child: IconButton(
                       icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: () {
-                        Navigator.pop(context); 
+                        Navigator.pop(context);
                       },
                     ),
                   ),
-                  
                 ],
-                
               ),
-              
             ),
 
             ListTile(
@@ -475,7 +450,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.hourglass_empty), 
+              leading: const Icon(Icons.hourglass_empty),
               subtitle: Row(
                 children: [
                   Expanded(
@@ -489,7 +464,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         setState(() {
                           _delayBetweenNotesMs = value.toInt();
                           _controller.delayBetweenNotesMs =
-                              _delayBetweenNotesMs; 
+                              _delayBetweenNotesMs;
                         });
                       },
                     ),
@@ -522,10 +497,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ),
             const Divider(
-              color: Colors.grey, 
-              thickness: 1, 
-              indent: 20, 
-              endIndent: 20, 
+              color: Colors.grey,
+              thickness: 1,
+              indent: 20,
+              endIndent: 20,
             ),
 
             ListTile(
@@ -592,10 +567,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             // ),
 
             const Divider(
-              color: Colors.grey, 
+              color: Colors.grey,
               thickness: 1,
-              indent: 20, 
-              endIndent: 20, 
+              indent: 20,
+              endIndent: 20,
             ),
 
             ListTile(
@@ -636,7 +611,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.flag), 
+              leading: const Icon(Icons.flag),
               title: const Text(
                 'Desafios',
                 style: TextStyle(
@@ -644,8 +619,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
               onTap: () {
-                Navigator.pop(context); 
-                _showChallengesModal(); 
+                Navigator.pop(context);
+                _showChallengesModal();
               },
             ),
 
@@ -666,22 +641,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               },
             ),
             ListTile(
-               leading: const Icon(Icons.handshake),
-                    title: const  Text(
-                        'Agradecimentos',
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                    
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ThankYouScreen(),
-                        ),
-                      );
-                    },
+              leading: const Icon(Icons.handshake),
+              title: const Text(
+                'Agradecimentos',
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ThankYouScreen(),
                   ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -739,7 +713,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     onNoteTap: (index) {},
                   ),
                 ),
-
                 SizedBox(
                   width: MediaQuery.of(context).size.width > 711 ? 600 : 350,
                   height: 50,
@@ -750,9 +723,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         style: const TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
-
-                          fontSize:
-                              30,
+                          fontSize: 30,
                         ),
                       ),
                       Expanded(
@@ -818,27 +789,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                    height:
-                        10), 
+                const SizedBox(height: 10),
                 SizedBox(
-                  width: 310, 
-                  height:
-                      270, 
+                  width: 310,
+                  height: 270,
                   child: Card(
                     color: const Color.fromARGB(255, 84, 173, 255),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          20),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
                       children: [
-                        const SizedBox(
-                            height:
-                                8), 
+                        const SizedBox(height: 8),
                         SizedBox(
-                          width:
-                              280,
+                          width: 280,
                           height: 50,
                           child: ResultDisplay(
                             display: _controller.display,
@@ -848,12 +812,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           ),
                           // ),
                         ),
-                        const SizedBox(
-                            height:
-                                5),
+                        const SizedBox(height: 5),
                         SizedBox(
-                          width:
-                              280,
+                          width: 280,
                           height: 190,
                           child:
                               CalculatorKeypad(onKeyPressed: _handleKeyPress),
@@ -867,26 +828,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
             if (_activeChallengeType == 'standard')
               Positioned(
-                top: _isMinimized
-                    ? null
-                    : 25, 
-                bottom:
-                    _isMinimized ? 10 : null,
-                left: MediaQuery.of(context).size.width > 1024
-                    ? 500
-                    : 0, 
-                right: MediaQuery.of(context).size.width > 1024
-                    ? 500
-                    : 0, 
+                top: _isMinimized ? null : 25,
+                bottom: _isMinimized ? 10 : null,
+                 left: MediaQuery.of(context).size.width > 1024
+                    ? MediaQuery.of(context).size.width * 0.2
+                    : 0,
+               right: MediaQuery.of(context).size.width > 1024
+                    ? MediaQuery.of(context).size.width * 0.2
+                    : 0,
                 child: Card(
-                  color: Colors.blue
-                      .withOpacity(0.9), 
+                  color: Colors.blue.withOpacity(0.9),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(10.0), 
+                    padding: const EdgeInsets.all(10.0),
                     child: _isMinimized
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -896,7 +852,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white, 
+                                  color: Colors.white,
                                 ),
                               ),
                               Row(
@@ -906,8 +862,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _isMinimized =
-                                            false; 
+                                        _isMinimized = false;
                                       });
                                     },
                                   ),
@@ -916,10 +871,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _activeChallengeType =
-                                            null; 
-                                        _isMinimized =
-                                            false;
+                                        _activeChallengeType = null;
+                                        _isMinimized = false;
                                       });
                                     },
                                   ),
@@ -928,8 +881,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             ],
                           )
                         : Column(
-                            mainAxisSize: MainAxisSize
-                                .min, 
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -939,7 +891,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _isMinimized = true; 
+                                        _isMinimized = true;
                                       });
                                     },
                                   ),
@@ -948,10 +900,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _activeChallengeType =
-                                            null; 
-                                        _isMinimized =
-                                            false; 
+                                        _activeChallengeType = null;
+                                        _isMinimized = false;
                                       });
                                     },
                                   ),
@@ -964,8 +914,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors
-                                        .white, 
+                                    color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -983,8 +932,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 onNoteTap: null,
                                 onMaxDigitsCalculated: null,
                               ),
-                              const SizedBox(
-                                  height: 20), 
+                              const SizedBox(height: 20),
                             ],
                           ),
                   ),
@@ -992,7 +940,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             if (_activeChallengeType == 'soundAndImage')
               Positioned(
-                top: _isMinimized ? null : 25, 
+                top: _isMinimized ? null : 25,
                 bottom: _isMinimized ? 10 : null,
                 left: MediaQuery.of(context).size.width > 1024
                     ? MediaQuery.of(context).size.width * 0.2
@@ -1001,15 +949,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ? MediaQuery.of(context).size.width * 0.2
                     : 0,
                 child: Card(
-                  color: Colors.blue
-                      .withOpacity(0.9), 
+                  color: Colors.blue.withOpacity(0.9),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(20), 
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
-                    padding:
-                        const EdgeInsets.all(10.0), 
+                    padding: const EdgeInsets.all(10.0),
                     child: _isMinimized
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1019,8 +964,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors
-                                      .white, 
+                                  color: Colors.white,
                                 ),
                               ),
                               Row(
@@ -1030,8 +974,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _isMinimized =
-                                            false; 
+                                        _isMinimized = false;
                                       });
                                     },
                                   ),
@@ -1040,13 +983,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _activeChallengeType =
-                                            null; 
-                                        _isMinimized =
-                                            false; 
-                                        _isPlayingAudio = false; 
-                                        player
-                                            ?.stop(); 
+                                        _activeChallengeType = null;
+                                        _isMinimized = false;
+                                        _isPlayingAudio = false;
+                                        player?.stop();
                                       });
                                     },
                                   ),
@@ -1055,10 +995,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             ],
                           )
                         : Column(
-                            mainAxisSize: MainAxisSize
-                                .min, 
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -1067,7 +1005,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _isMinimized = true; 
+                                        _isMinimized = true;
                                       });
                                     },
                                   ),
@@ -1076,19 +1014,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _activeChallengeType =
-                                            null; 
-                                        _isMinimized =
-                                            false; 
-                                        _isPlayingAudio = false; 
-                                        player
-                                            ?.stop(); 
+                                        _activeChallengeType = null;
+                                        _isMinimized = false;
+                                        _isPlayingAudio = false;
+                                        player?.stop();
                                       });
                                     },
                                   ),
                                 ],
                               ),
-                             
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 5.0),
                                 child: Text(
@@ -1096,27 +1030,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors
-                                        .white, 
+                                    color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                               const SizedBox(height: 10),
-                             
                               MosaicDisplay(
                                 result: _challengeMosaic,
                                 digitColors: digitColors,
                                 decimalPlaces: 400,
                                 digitsPerRow: 19,
-                                squareSize: MediaQuery.of(context).size.width <
-                                        400
-                                    ? 15.0
-                                    : 20.0, 
+                                squareSize:
+                                    MediaQuery.of(context).size.width < 400
+                                        ? 15.0
+                                        : 20.0,
                                 currentNoteIndex: null,
                               ),
                               const SizedBox(height: 20),
-                              
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -1135,7 +1066,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 20), 
+                              const SizedBox(height: 20),
                             ],
                           ),
                   ),
@@ -1143,7 +1074,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             if (_activeChallengeType == 'sound')
               Positioned(
-                top: _isMinimized ? null : 25, 
+                top: _isMinimized ? null : 25,
                 bottom: _isMinimized ? 10 : null,
                 left: MediaQuery.of(context).size.width > 1024
                     ? MediaQuery.of(context).size.width * 0.2
@@ -1152,15 +1083,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ? MediaQuery.of(context).size.width * 0.2
                     : 0,
                 child: Card(
-                  color: Colors.blue
-                      .withOpacity(0.9), 
+                  color: Colors.blue.withOpacity(0.9),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(20), 
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
-                    padding:
-                        const EdgeInsets.all(10.0), 
+                    padding: const EdgeInsets.all(10.0),
                     child: _isMinimized
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1170,8 +1098,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors
-                                      .white, 
+                                  color: Colors.white,
                                 ),
                               ),
                               Row(
@@ -1181,8 +1108,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _isMinimized =
-                                            false; 
+                                        _isMinimized = false;
                                       });
                                     },
                                   ),
@@ -1191,13 +1117,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _activeChallengeType =
-                                            null; 
-                                        _isMinimized =
-                                            false; 
-                                        _isPlayingAudio = false; 
-                                        player
-                                            ?.stop(); 
+                                        _activeChallengeType = null;
+                                        _isMinimized = false;
+                                        _isPlayingAudio = false;
+                                        player?.stop();
                                       });
                                     },
                                   ),
@@ -1206,10 +1129,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             ],
                           )
                         : Column(
-                            mainAxisSize: MainAxisSize
-                                .min, 
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                             
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -1218,7 +1139,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _isMinimized = true; 
+                                        _isMinimized = true;
                                       });
                                     },
                                   ),
@@ -1227,19 +1148,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         color: Colors.white),
                                     onPressed: () {
                                       setState(() {
-                                        _activeChallengeType =
-                                            null; 
-                                        _isMinimized =
-                                            false; 
-                                        _isPlayingAudio = false; 
-                                        player
-                                            ?.stop(); 
+                                        _activeChallengeType = null;
+                                        _isMinimized = false;
+                                        _isPlayingAudio = false;
+                                        player?.stop();
                                       });
                                     },
                                   ),
                                 ],
                               ),
-                              
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 5.0),
                                 child: Text(
@@ -1247,14 +1164,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors
-                                        .white, 
+                                    color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -1273,7 +1188,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 20), 
+                              const SizedBox(height: 20),
                             ],
                           ),
                   ),
