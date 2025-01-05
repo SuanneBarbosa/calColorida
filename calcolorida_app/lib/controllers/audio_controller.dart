@@ -76,8 +76,7 @@ Future<void> initializeAudio() async {
     for (int digit = 0; digit <= 9; digit++) {
       String note = digitToNote[digit]!;
       String audioPath = 'assets/sounds/$selectedInstrument/${note}_$fileNamePrefix.mp3';
-      print("Carregando arquivo de áudio: $audioPath");
-
+     
       UriAudioSource source = AudioSource.asset(audioPath);
       digitToAudioSource[digit] = source;
     }
@@ -98,52 +97,64 @@ void stopPlayback() {
 Future<void> playMelodyAudio({
   required List<int> digits,
   int durationMs = 500,
+  required int delayMs,
   Function(int noteIndex)? onNoteStarted,
   Function(int noteIndex)? onNoteFinished,
-  Function()? onPlaybackCompleted, 
+  Function()? onPlaybackCompleted,
 }) async {
   try {
     if (player == null) {
       await initializeAudio();
     }
 
-    
     _onNoteStarted = onNoteStarted;
     _onNoteFinished = onNoteFinished;
     _totalNotes = digits.length;
 
     List<AudioSource> sequence = [];
-
+    String silenceAudioPath = 'assets/sounds/silence.mp3';
+    UriAudioSource silenceAudio = AudioSource.asset(silenceAudioPath);
     for (int i = 0; i < digits.length; i++) {
       int digit = digits[i];
       if (digitToAudioSource.containsKey(digit)) {
         UriAudioSource originalSource = digitToAudioSource[digit]!;
-
-        
         ClippingAudioSource clippedSource = ClippingAudioSource(
           child: originalSource,
           start: Duration.zero,
           end: Duration(milliseconds: durationMs),
           tag: i, 
         );
-
+        sequence.add(clippedSource);
+      }
+      if(delayMs > 0) {
+        ClippingAudioSource clippedSource = ClippingAudioSource(
+          child: silenceAudio,
+          start: Duration.zero,
+          end: Duration(milliseconds: delayMs),
+          tag: -1, 
+        );
         sequence.add(clippedSource);
       }
     }
 
-   
     ConcatenatingAudioSource playlist = ConcatenatingAudioSource(children: sequence);
 
     await player!.setAudioSource(playlist);
 
-    
+    _sequenceStateSubscription = player!.sequenceStateStream.listen((sequenceState) {
+      if (sequenceState != null && _onNoteStarted != null) {
+        int currentIndex = sequenceState.currentIndex;
+        int indexForCallback = delayMs > 0 ? currentIndex ~/ 2 : currentIndex;
+          _onNoteStarted!(indexForCallback);
+      }
+    });
+
     await player!.play();
 
   } catch (e) {
     print("Erro ao reproduzir a melodia: $e");
   }
 }
-
 
 Future<void> stopAudio() async {
   try {

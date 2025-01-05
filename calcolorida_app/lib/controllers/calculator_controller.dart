@@ -5,7 +5,6 @@ import 'package:decimal/decimal.dart';
 import 'package:calcolorida_app/controllers/audio_controller.dart';
 import 'package:calcolorida_app/models/mosaic_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../services/shared_preferences_service.dart';
 
 class CalculatorController {
@@ -23,11 +22,8 @@ class CalculatorController {
   String _selectedInstrument = 'piano';
   int _mosaicDigitsPerRow = 19;
   bool _ignoreZeros = false;
-  bool get ignoreZeros => _ignoreZeros;
-
-  set ignoreZeros(bool value) {
-    _ignoreZeros = value;
-  }
+  int _delayBetweenNotesMs = 0;
+  
 
 
   List<MosaicModel> savedMosaics = [];
@@ -39,11 +35,16 @@ class CalculatorController {
   double get squareSize => _squareSize;
   bool get isResultDisplayed => _isResultDisplayed;
   int get mosaicDigitsPerRow => _mosaicDigitsPerRow;
-  // bool get ignoreZeros => _ignoreZeros;
+  bool get ignoreZeros => _ignoreZeros;
+  int get delayBetweenNotesMs => _delayBetweenNotesMs;
 
-  // set ignoreZeros(bool value) {
-  //   _ignoreZeros = value;
-  // }
+  set ignoreZeros(bool value) {
+    _ignoreZeros = value;
+  }
+
+  set delayBetweenNotesMs(int value) {
+    _delayBetweenNotesMs = value;
+  }
 
   set squareSize(double value) {
     _squareSize = value;
@@ -152,7 +153,7 @@ class CalculatorController {
 
   void _calculate(BuildContext context) {
     if (_operation.isEmpty) {
-      _showErrorModal(context, "Nenhuma operação foi definida.");
+      // _showErrorModal(context, "Nenhuma operação foi definida.");
       return;
     }
     if (_currentNumber.isEmpty) {
@@ -178,7 +179,7 @@ class CalculatorController {
             _result = (_result / secondNumber)
                 .toDecimal(scaleOnInfinitePrecision: _decimalPlaces);
           } else {
-            _showErrorModal(context, "Não é possível dividir por zero.");
+            _showErrorModal(context, "Erro: Não é possível dividir por zero.");
             return;
           }
           break;
@@ -211,11 +212,12 @@ class CalculatorController {
   Future<void> playMelody({
     int durationMs = 500,
     int? maxDigits,
+    int? delayMs,
     Function(int noteIndex)? onNoteStarted,
     Function(int noteIndex)? onNoteFinished,
   }) async {
     if (!_isResultDisplayed) {
-      print("O áudio só pode tocar após o resultado ser exibido.");
+      // print("O áudio só pode tocar após o resultado ser exibido.");
       return;
     }
 
@@ -234,7 +236,7 @@ class CalculatorController {
       }
 
       if (digitsToPlay.isEmpty) {
-        print("Nenhum dígito para reproduzir após o ponto decimal.");
+        // print("Nenhum dígito para reproduzir após o ponto decimal.");
         return;
       }
 
@@ -256,6 +258,7 @@ class CalculatorController {
         await playMelodyAudio(
           digits: digitsToPlay,
           durationMs: durationMs,
+          delayMs: delayMs ?? 0,
           onNoteStarted: (noteIndex) {
             if (onNoteStarted != null) {
               int originalIndex = 0;
@@ -282,14 +285,10 @@ class CalculatorController {
           onNoteFinished: onNoteFinished,
         );
       } catch (e) {
-        print("Erro ao reproduzir melodia: $e");
+        // print("Erro ao reproduzir melodia: $e");
       }
     }
   }
-
-  
-
-
 
   Future<void> stopMelody() async {
     stopPlayback();
@@ -340,26 +339,6 @@ class CalculatorController {
     _applyDecimalPlaces();
   }
 
-  // void _updateDisplay() {
-  //   if (_currentNumber.isEmpty) {
-  //     _display = _result.toStringAsFixed(_decimalPlaces);
-  //   } else {
-  //     _display = _currentNumber;
-  //   }
-
-  //   if (_display.endsWith('.')) {
-  //     _display = _display.substring(0, _display.length - 1);
-  //   }
-
-  //   if (_display.contains('.')) {
-  //     _display = _display.replaceAll(RegExp(r'\.?0+$'), '');
-  //   }
-
-  //   if (_display.endsWith('.0')) {
-  //     _display = _display.substring(0, _display.length - 2);
-  //   }
-  // }
-
   void _updateDisplay() {
     if (_currentNumber.isEmpty) {
       _display = _result.toStringAsFixed(_decimalPlaces);
@@ -371,8 +350,8 @@ class CalculatorController {
       _display = _currentNumber;
     }
 
-    // Remove zeros à direita apenas se há números depois do ponto decimal
-    print(_display);
+   
+    // print(_display);
     if (_isResultDisplayed) {
       _display = _display.replaceAll(RegExp(r'0+$'), '');
       if (_display.endsWith('.')) {
@@ -383,7 +362,7 @@ class CalculatorController {
 
   void _calculateSqrt(BuildContext context) {
     if (_currentNumber.isEmpty) {
-      _showErrorModal(context, "Valor nulo.");
+      // _showErrorModal(context, "Valor nulo.");
       return;
     }
 
@@ -391,7 +370,7 @@ class CalculatorController {
       Decimal number = Decimal.parse(_currentNumber);
 
       if (number < Decimal.zero) {
-        _showErrorModal(context, "Número negativo.");
+        // _showErrorModal(context, "Número negativo.");
 
         return;
       }
@@ -402,7 +381,7 @@ class CalculatorController {
       _isResultDisplayed = true;
       _updateDisplay();
     } catch (e) {
-      _showErrorModal(context, "Erro: Entrada Inválida.");
+      // _showErrorModal(context, "Erro: Entrada Inválida.");
     }
   }
 
@@ -419,7 +398,7 @@ class CalculatorController {
         (value / two).toDecimal(scaleOnInfinitePrecision: decimalPlaces);
     Decimal lastGuess;
 
-    int maxIterations = 400;
+    int maxIterations = 10;
     int iteration = 0;
 
     while (true) {
@@ -447,7 +426,7 @@ class CalculatorController {
 
   void _insertPi() {
     final Decimal piDecimal = Decimal.parse(
-        '3.14159265358979323846264338327950288419716939937510582097494459230');
+        '3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933446128475648233786783165271201909145648566923460348610454326648213393607260249141273724587006606315588174881520920962829254091715364367892590360011330530548820466521384146951941511609');
 
     if (_currentNumber.isEmpty) {
       _currentNumber = piDecimal.toStringAsFixed(_decimalPlaces);
@@ -458,7 +437,7 @@ class CalculatorController {
 
   void _calculateInverse(BuildContext context) {
     if (_currentNumber.isEmpty) {
-      _showErrorModal(context, "Erro: Valor Nulo.");
+      // _showErrorModal(context, "Erro: Valor Nulo.");
       return;
     }
 
@@ -471,7 +450,7 @@ class CalculatorController {
         _isResultDisplayed = true;
         _updateDisplay();
       } else {
-        _showErrorModal(context, "Erro: Divisão por zero.");
+        _showErrorModal(context, "Erro: Não é possível dividir por zero.");
       }
     } catch (e) {
       _showErrorModal(context, "Erro: Entrada Inválida.");
@@ -480,14 +459,14 @@ class CalculatorController {
 
   void _calculateFactorial(BuildContext context) {
     if (_currentNumber.isEmpty) {
-      _showErrorModal(context, "Erro: Valor Nulo.");
+      // _showErrorModal(context, "Erro: Valor Nulo.");
       return;
     }
 
     try {
       Decimal numberDecimal = Decimal.parse(_currentNumber);
       if ((numberDecimal % Decimal.one) != Decimal.zero) {
-        _showErrorModal(context, "Erro: Entrada não é um inteiro.");
+        _showErrorModal(context, "Erro: Entrada não é um número inteiro.");
         return;
       }
 
@@ -585,8 +564,6 @@ class CalculatorController {
   }
 
   void loadMosaic(String operation, String result) {
-    print('Carregando mosaico no controlador');
-
     _expression = operation;
     _currentNumber = result;
     _result = Decimal.parse(result);
@@ -621,7 +598,7 @@ class CalculatorController {
 }
 
   Future<void> loadMosaics() async {
-     loadFixedMosaics(); // Carrega os mosaicos fixos primeiro
+     loadFixedMosaics(); 
     final prefs = await SharedPreferences.getInstance();
     final mosaicListJson = prefs.getStringList('savedMosaics');
 
@@ -633,11 +610,11 @@ class CalculatorController {
     }
   }
 
-  //Mensagens de Erro:
+  
   void _showErrorModal(BuildContext context, String errorMessage) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Impede fechar clicando fora
+      barrierDismissible: true, 
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Verifique o Erro."),

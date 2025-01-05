@@ -7,7 +7,7 @@ class ThankYouScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Voltar"),
+        title: const Text("Agradecimentos"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -16,15 +16,6 @@ class ThankYouScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                "Agradecimentos!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
-                ),
-              ),
               const SizedBox(height: 20),
               Card(
                 elevation: 4,
@@ -89,8 +80,6 @@ class ThankYouScreen extends StatelessWidget {
                         ),
                         textAlign: TextAlign.center,
                         softWrap: true, 
-                        // overflow: TextOverflow
-                        //     .fade, // Faz o texto desaparecer suavemente em vez de quebrar.
                       ),
                       SizedBox(height: 10),
                       Text(

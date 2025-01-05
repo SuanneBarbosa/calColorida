@@ -57,7 +57,7 @@ class CalculatorKeypad extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: fontSize, // Adicionado o tamanho da fonte como parâmetro
+          fontSize: fontSize, 
           color: fontColor ?? Colors.white,
         ),
       ),

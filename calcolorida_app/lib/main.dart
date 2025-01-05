@@ -6,7 +6,7 @@ import 'package:calcolorida_app/user_interface/screens/calculator_screen.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-// Força o aplicativo a ficar somente na orientação vertical.
+// Somente na orientação vertical.
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

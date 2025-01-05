@@ -42,10 +42,11 @@ class UsageInstructionsScreen extends StatelessWidget {
               title: '5. Ajustar Configurações',
               description:
                   'No menu lateral, você pode ajustar diferentes configurações para personalizar a experiência:\n'
-                   '- Instrumento musical: Use o menu suspenso com o ícone de nota musical para selecionar o instrumento que tocará as notas musicais correspondentes ao mosaico (por exemplo, piano, violino, guitarra, etc.).\n'
-                  '- Zoom do mosaico: Use o slider "Zoom" para alterar o tamanho dos quadrados no mosaico, aumentando ou diminuindo o nível de detalhe exibido.\n'
+                  '- Instrumento musical: Use o menu suspenso com o ícone de nota musical para selecionar o instrumento que tocará as notas musicais correspondentes ao mosaico (por exemplo, piano, violino, guitarra, etc.).\n'
+                  '- Zoom do mosaico: Use o slider "Zoom do Mosaico" para alterar o tamanho dos quadrados no mosaico, aumentando ou diminuindo o nível de detalhe exibido.\n'
                   '- Velocidade de reprodução: Ajuste o slider com o ícone de velocidade para controlar a duração de cada nota musical reproduzida, tornando-a mais lenta ou mais rápida.\n'
-                  '- Ignorar Zeros: Ative essa opção para evitar que os zeros sejam reproduzidos e destacados quando o botão play for acionado.\n',
+                  '- Ignorar Zeros: Ative essa opção para evitar que os zeros sejam reproduzidos e destacados quando o botão play for acionado.\n'
+                  '- Tempo entre notas: Ajuste o slider com o ícone de ampulheta para aumentar ou diminuir a diferença de tempo entre as notas que estão tocando.\n',
                  
             ),
             _buildInstructionItem(
@@ -65,7 +66,7 @@ class UsageInstructionsScreen extends StatelessWidget {
             ),
             _buildInstructionItem(
               context,
-              title: '8. Apagar Tudo',
+              title: '8. Limpar Tela',
               description:
                   'Clique no botão "C" para apagar todos os números e operações no cálculo atual.',
             ),
@@ -114,7 +115,7 @@ class UsageInstructionsScreen extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            color: Colors.blue,
+            color: Colors.blueAccent,
           ),
         ),
         const SizedBox(height: 8),
