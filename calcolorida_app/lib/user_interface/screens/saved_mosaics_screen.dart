@@ -58,72 +58,77 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                color: mosaic.isFixed
-                    ? Colors.blue.shade50
-                    : Colors.white, // Cor diferente para mosaicos fixos
-                  child: Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ListTile(
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  _applySavedMosaic(mosaic);
-                                  print(
-                                      'Aplicando mosaico: operação=${mosaic.operation}, resultado=${mosaic.result}');
-                                },
-                                child: const Text(
-                                  'Aplicar',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 17,
+                    color: mosaic.isFixed
+                        ? Colors.blue.shade50
+                        : Colors.white, // Cor diferente para mosaicos fixos
+                    child: Card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ListTile(
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    _applySavedMosaic(mosaic);
+                                    print(
+                                        'Aplicando mosaico: operação=${mosaic.operation}, resultado=${mosaic.result}');
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white, backgroundColor: Colors.blue,
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
                                   ),
+                                  child: const Text('Aplicar'),
                                 ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete,
-                                    color: Colors.red, size: 30),
-                                onPressed: mosaic.isFixed
-                                    ? null // Desabilita exclusão de mosaicos fixos
-                                    : () {
-                                        _confirmDeletion(index);
-                                      },
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 200,
-                          child: MosaicDisplay(
-                            result: mosaic.result,
-                            digitColors: digitColors,
-                            decimalPlaces: decimalPlaces,
-                            digitsPerRow: mosaic.mosaicDigitsPerRow,
-                            squareSize: squareSize,
-                            currentNoteIndex: _currentPlayingIndex == index
-                                ? _currentNoteIndex
-                                : null,
-                            onNoteTap: null,
-                            onMaxDigitsCalculated: null,
-                          ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Operação: ${mosaic.operation}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Colors.blueAccent,
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: mosaic.isFixed
+                                        ? Colors.grey
+                                        : Colors.red,
+                                    size: 35,
+                                  ),
+                                  onPressed: mosaic.isFixed
+                                      ? null 
+                                      : () {
+                                          _confirmDeletion(index);
+                                        },
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            height: 200,
+                            child: MosaicDisplay(
+                              result: mosaic.result,
+                              digitColors: digitColors,
+                              decimalPlaces: decimalPlaces,
+                              digitsPerRow: mosaic.mosaicDigitsPerRow,
+                              squareSize: squareSize,
+                              currentNoteIndex: _currentPlayingIndex == index
+                                  ? _currentNoteIndex
+                                  : null,
+                              onNoteTap: null,
+                              onMaxDigitsCalculated: null,
+                            ),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Operação: ${mosaic.operation}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                   ),
                 );
               },

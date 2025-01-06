@@ -590,6 +590,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             await SharedPreferencesService.getInstrument();
                         final duration =
                             await SharedPreferencesService.getNoteDuration();
+                        final digitsPerRow = await SharedPreferencesService
+                            .getMosaicDigitsPerRow();
 
                         setState(() {
                           if (zoom != null) {
@@ -602,6 +604,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                           }
                           if (duration != null) {
                             _noteDurationMs = duration;
+                          }
+                          if (digitsPerRow != null) {
+                            _mosaicDigitsPerRow = digitsPerRow;
+                            _controller.mosaicDigitsPerRow = digitsPerRow;
                           }
                         });
                       },
@@ -694,7 +700,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height > 740 &&
                           MediaQuery.of(context).size.width < 1024
-                      ? 350
+                      ? 330
                       : 200,
                   child: MosaicDisplay(
                     result: _controller.isResultDisplayed
@@ -830,10 +836,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               Positioned(
                 top: _isMinimized ? null : 25,
                 bottom: _isMinimized ? 10 : null,
-                 left: MediaQuery.of(context).size.width > 1024
+                left: MediaQuery.of(context).size.width > 1024
                     ? MediaQuery.of(context).size.width * 0.2
                     : 0,
-               right: MediaQuery.of(context).size.width > 1024
+                right: MediaQuery.of(context).size.width > 1024
                     ? MediaQuery.of(context).size.width * 0.2
                     : 0,
                 child: Card(
@@ -1040,7 +1046,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 result: _challengeMosaic,
                                 digitColors: digitColors,
                                 decimalPlaces: 400,
-                                digitsPerRow: 19,
+                                digitsPerRow: _mosaicDigitsPerRow,
                                 squareSize:
                                     MediaQuery.of(context).size.width < 400
                                         ? 15.0

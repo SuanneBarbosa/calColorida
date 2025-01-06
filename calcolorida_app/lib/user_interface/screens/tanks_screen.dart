@@ -31,7 +31,7 @@ class ThankYouScreen extends StatelessWidget {
                         "Nathalie Sinclair",
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                          textAlign: TextAlign.center,
@@ -42,7 +42,7 @@ class ThankYouScreen extends StatelessWidget {
                         "Lulu Healy",
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                          textAlign: TextAlign.center,
@@ -53,7 +53,7 @@ class ThankYouScreen extends StatelessWidget {
                         "Guilherme Magalhães",
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                          textAlign: TextAlign.center,
@@ -64,7 +64,7 @@ class ThankYouScreen extends StatelessWidget {
                         "Luis Fernando Pacheco Pereira",
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                          textAlign: TextAlign.center,
@@ -75,7 +75,7 @@ class ThankYouScreen extends StatelessWidget {
                         "Solange Hassan Ahmad Ali Fernandes",
                         style: const TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -86,7 +86,7 @@ class ThankYouScreen extends StatelessWidget {
                         "Suanne Almeida Barbosa",
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black87,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                          textAlign: TextAlign.center,
