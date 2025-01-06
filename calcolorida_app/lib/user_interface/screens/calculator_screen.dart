@@ -10,7 +10,7 @@ import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
 
-enum LayoutType { mobile, tablet, desktop }
+
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
