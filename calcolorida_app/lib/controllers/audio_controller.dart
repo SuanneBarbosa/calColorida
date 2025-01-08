@@ -2,14 +2,29 @@ import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:calcolorida_app/constants/constants.dart';
 
-AudioPlayer? player; 
-Map<int, UriAudioSource> digitToAudioSource = {};
-bool _shouldStop = false;
 
-Function(int noteIndex)? _onNoteStarted;
-Function(int noteIndex)? _onNoteFinished;
-int _totalNotes = 0;
-String selectedInstrument = 'piano'; 
+AudioPlayer? mainPlayer;       
+AudioPlayer? challengePlayer;  
+
+
+Map<int, UriAudioSource> digitToAudioSourceMain = {};
+
+Map<int, UriAudioSource> digitToAudioSourceChallenge = {};
+
+
+Function(int noteIndex)? _onMainNoteStarted;
+Function(int noteIndex)? _onMainNoteFinished;
+int _totalMainNotes = 0;
+
+
+Function(int noteIndex)? _onChallengeNoteStarted;
+Function(int noteIndex)? _onChallengeNoteFinished;
+int _totalChallengeNotes = 0;
+
+
+String selectedInstrument = 'piano';
+
+
 Map<String, String> instrumentFileNameMap = {
   'piano': 'Piano_Acustico',
   'baixo': 'Baixo_Eletrico_Dedo',
@@ -39,61 +54,104 @@ Map<String, String> instrumentDisplayNameMap = {
 };
 
 
-StreamSubscription<SequenceState?>? _sequenceStateSubscription;
-StreamSubscription<ProcessingState>? _processingStateSubscription;
+StreamSubscription<SequenceState?>? _mainSequenceStateSubscription;
+StreamSubscription<ProcessingState>? _mainProcessingStateSubscription;
 
 
-Future<void> initializeAudio() async {
-  try {
-    if (player == null) {
-      player = AudioPlayer();
+StreamSubscription<SequenceState?>? _challengeSequenceStateSubscription;
+StreamSubscription<ProcessingState>? _challengeProcessingStateSubscription;
 
-      
-      _sequenceStateSubscription = player!.sequenceStateStream.listen((sequenceState) {
-        if (sequenceState != null && _onNoteStarted != null) {
-          int currentIndex = sequenceState.currentIndex;
-          _onNoteStarted!(currentIndex);
-        }
-      });
-      
-      _processingStateSubscription = player!.processingStateStream.listen((processingState) {
-        if (processingState == ProcessingState.completed) {
-         
-          if (_onNoteFinished != null) {
-            _onNoteFinished!(_totalNotes - 1);
-          }
-        }
-      });
-      
-    }
-  
-    digitToAudioSource.clear();
+
+Future<void> initializeMainAudio() async {
+  if (mainPlayer == null) {
+    mainPlayer = AudioPlayer();
 
     
-    String fileNamePrefix = instrumentFileNameMap[selectedInstrument] ?? 'Piano_Acustico';
+    _mainSequenceStateSubscription =
+        mainPlayer!.sequenceStateStream.listen((sequenceState) {
+      if (sequenceState != null && _onMainNoteStarted != null) {
+        final currentIndex = sequenceState.currentIndex;
+       
+        _onMainNoteStarted!(currentIndex);
+      }
+    });
 
+    _mainProcessingStateSubscription =
+        mainPlayer!.processingStateStream.listen((processingState) {
+      if (processingState == ProcessingState.completed) {
+        if (_onMainNoteFinished != null) {
+          _onMainNoteFinished!(_totalMainNotes - 1);
+        }
+      }
+    });
+  }
+
+  
+  digitToAudioSourceMain.clear();
+
+  
+  final fileNamePrefix =
+      instrumentFileNameMap[selectedInstrument] ?? 'Piano_Acustico';
+
+  try {
     for (int digit = 0; digit <= 9; digit++) {
-      String note = digitToNote[digit]!;
-      String audioPath = 'assets/sounds/$selectedInstrument/${note}_$fileNamePrefix.mp3';
-     
-      UriAudioSource source = AudioSource.asset(audioPath);
-      digitToAudioSource[digit] = source;
+      final note = digitToNote[digit]!; 
+      final audioPath =
+          'assets/sounds/$selectedInstrument/${note}_$fileNamePrefix.mp3';
+
+      final source = AudioSource.asset(audioPath);
+      digitToAudioSourceMain[digit] = source;
     }
   } catch (e) {
-    print("Erro ao inicializar fontes de áudio: $e");
+    print("Erro ao inicializar fontes de áudio MAIN: $e");
   }
 }
 
-void startPlayback() {
-  _shouldStop = false;
+
+Future<void> initializeChallengeAudio() async {
+  if (challengePlayer == null) {
+    challengePlayer = AudioPlayer();
+
+    
+    _challengeSequenceStateSubscription =
+        challengePlayer!.sequenceStateStream.listen((sequenceState) {
+      if (sequenceState != null && _onChallengeNoteStarted != null) {
+        final currentIndex = sequenceState.currentIndex;
+        _onChallengeNoteStarted!(currentIndex);
+      }
+    });
+
+    _challengeProcessingStateSubscription =
+        challengePlayer!.processingStateStream.listen((processingState) {
+      if (processingState == ProcessingState.completed) {
+        if (_onChallengeNoteFinished != null) {
+          _onChallengeNoteFinished!(_totalChallengeNotes - 1);
+        }
+      }
+    });
+  }
+
+  digitToAudioSourceChallenge.clear();
+
+  final fileNamePrefix =
+      instrumentFileNameMap[selectedInstrument] ?? 'Piano_Acustico';
+
+  try {
+    for (int digit = 0; digit <= 9; digit++) {
+      final note = digitToNote[digit]!;
+      final audioPath =
+          'assets/sounds/$selectedInstrument/${note}_$fileNamePrefix.mp3';
+
+      final source = AudioSource.asset(audioPath);
+      digitToAudioSourceChallenge[digit] = source;
+    }
+  } catch (e) {
+    print("Erro ao inicializar fontes de áudio CHALLENGE: $e");
+  }
 }
 
-void stopPlayback() {
-  _shouldStop = true;
-}
 
-
-Future<void> playMelodyAudio({
+Future<void> playMainMelodyAudio({
   required List<int> digits,
   int durationMs = 500,
   required int delayMs,
@@ -102,77 +160,183 @@ Future<void> playMelodyAudio({
   Function()? onPlaybackCompleted,
 }) async {
   try {
-    if (player == null) {
-      await initializeAudio();
+    
+    if (mainPlayer == null) {
+      await initializeMainAudio();
     }
 
-    _onNoteStarted = onNoteStarted;
-    _onNoteFinished = onNoteFinished;
-    _totalNotes = digits.length;
+    _onMainNoteStarted = onNoteStarted;
+    _onMainNoteFinished = onNoteFinished;
+    _totalMainNotes = digits.length;
 
     List<AudioSource> sequence = [];
-    String silenceAudioPath = 'assets/sounds/silence.mp3';
-    UriAudioSource silenceAudio = AudioSource.asset(silenceAudioPath);
+    final silenceAudioPath = 'assets/sounds/silence.mp3';
+    final silenceAudio = AudioSource.asset(silenceAudioPath);
+
     for (int i = 0; i < digits.length; i++) {
-      int digit = digits[i];
-      if (digitToAudioSource.containsKey(digit)) {
-        UriAudioSource originalSource = digitToAudioSource[digit]!;
-        ClippingAudioSource clippedSource = ClippingAudioSource(
+      final digit = digits[i];
+
+      if (digitToAudioSourceMain.containsKey(digit)) {
+        final originalSource = digitToAudioSourceMain[digit]!;
+        final clippedSource = ClippingAudioSource(
           child: originalSource,
           start: Duration.zero,
           end: Duration(milliseconds: durationMs),
-          tag: i, 
+          tag: i,
         );
         sequence.add(clippedSource);
       }
-      if(delayMs > 0) {
-        ClippingAudioSource clippedSource = ClippingAudioSource(
+      if (delayMs > 0) {
+        final clippedSilence = ClippingAudioSource(
           child: silenceAudio,
           start: Duration.zero,
           end: Duration(milliseconds: delayMs),
-          tag: -1, 
+          tag: -1,
         );
-        sequence.add(clippedSource);
+        sequence.add(clippedSilence);
       }
     }
 
-    ConcatenatingAudioSource playlist = ConcatenatingAudioSource(children: sequence);
+    final playlist = ConcatenatingAudioSource(children: sequence);
 
-    await player!.setAudioSource(playlist);
+    
+    await mainPlayer!.setAudioSource(playlist);
 
-    _sequenceStateSubscription = player!.sequenceStateStream.listen((sequenceState) {
-      if (sequenceState != null && _onNoteStarted != null) {
-        int currentIndex = sequenceState.currentIndex;
-        int indexForCallback = delayMs > 0 ? currentIndex ~/ 2 : currentIndex;
-          _onNoteStarted!(indexForCallback);
+    
+    _mainSequenceStateSubscription =
+        mainPlayer!.sequenceStateStream.listen((sequenceState) {
+      if (sequenceState != null && _onMainNoteStarted != null) {
+        final currentIndex = sequenceState.currentIndex;
+        final indexForCallback = delayMs > 0 ? currentIndex ~/ 2 : currentIndex;
+        _onMainNoteStarted!(indexForCallback);
       }
     });
 
-    await player!.play();
+    
+    await mainPlayer!.play();
 
+    
+    mainPlayer!.processingStateStream.listen((state) {
+      if (state == ProcessingState.completed) {
+        onPlaybackCompleted?.call();
+      }
+    });
   } catch (e) {
-    print("Erro ao reproduzir a melodia: $e");
+    print("Erro ao reproduzir a melodia MAIN: $e");
   }
 }
 
-Future<void> stopAudio() async {
+
+Future<void> playChallengeMelodyAudio({
+  required List<int> digits,
+  int durationMs = 500,
+  required int delayMs,
+  Function(int noteIndex)? onNoteStarted,
+  Function(int noteIndex)? onNoteFinished,
+  Function()? onPlaybackCompleted,
+}) async {
   try {
-    await player?.stop(); 
-    await player?.seek(Duration.zero); 
+    
+    if (challengePlayer == null) {
+      await initializeChallengeAudio();
+    }
+
+    _onChallengeNoteStarted = onNoteStarted;
+    _onChallengeNoteFinished = onNoteFinished;
+    _totalChallengeNotes = digits.length;
+
+    List<AudioSource> sequence = [];
+    final silenceAudioPath = 'assets/sounds/silence.mp3';
+    final silenceAudio = AudioSource.asset(silenceAudioPath);
+
+    for (int i = 0; i < digits.length; i++) {
+      final digit = digits[i];
+
+      if (digitToAudioSourceChallenge.containsKey(digit)) {
+        final originalSource = digitToAudioSourceChallenge[digit]!;
+        final clippedSource = ClippingAudioSource(
+          child: originalSource,
+          start: Duration.zero,
+          end: Duration(milliseconds: durationMs),
+          tag: i,
+        );
+        sequence.add(clippedSource);
+      }
+      if (delayMs > 0) {
+        final clippedSilence = ClippingAudioSource(
+          child: silenceAudio,
+          start: Duration.zero,
+          end: Duration(milliseconds: delayMs),
+          tag: -1,
+        );
+        sequence.add(clippedSilence);
+      }
+    }
+
+    final playlist = ConcatenatingAudioSource(children: sequence);
+
+    await challengePlayer!.setAudioSource(playlist);
+
+    _challengeSequenceStateSubscription =
+        challengePlayer!.sequenceStateStream.listen((sequenceState) {
+      if (sequenceState != null && _onChallengeNoteStarted != null) {
+        final currentIndex = sequenceState.currentIndex;
+        final indexForCallback = delayMs > 0 ? currentIndex ~/ 2 : currentIndex;
+        _onChallengeNoteStarted!(indexForCallback);
+      }
+    });
+
+    await challengePlayer!.play();
+
+   
+    challengePlayer!.processingStateStream.listen((state) {
+      if (state == ProcessingState.completed) {
+        onPlaybackCompleted?.call();
+      }
+    });
   } catch (e) {
-    print("Erro ao parar o áudio: $e");
+    print("Erro ao reproduzir a melodia CHALLENGE: $e");
   }
 }
 
-Future<void> disposeAudio() async {
-  try {
-    await player?.dispose();
-    await _sequenceStateSubscription?.cancel(); 
-    await _processingStateSubscription?.cancel();
-    player = null;
-  } catch (e) {
-    print("Erro ao liberar o player: $e");
-  }
 
-  
+Future<void> stopMainAudio() async {
+  try {
+    await mainPlayer?.stop();
+    await mainPlayer?.seek(Duration.zero);
+  } catch (e) {
+    print("Erro ao parar o áudio MAIN: $e");
+  }
+  // if (mainPlayer != null) {
+  //   await mainPlayer!.stop();
+  //   await mainPlayer!.seek(Duration.zero);
+  // }
+}
+
+Future<void> stopChallengeAudio() async {
+  try {
+    await challengePlayer?.stop();
+    await challengePlayer?.seek(Duration.zero);
+  } catch (e) {
+    print("Erro ao parar o áudio CHALLENGE: $e");
+  }
+}
+
+
+Future<void> disposeAllAudio() async {
+  try {
+    // MAIN
+    await mainPlayer?.dispose();
+    await _mainSequenceStateSubscription?.cancel();
+    await _mainProcessingStateSubscription?.cancel();
+    mainPlayer = null;
+
+    // DESAFIO
+    await challengePlayer?.dispose();
+    await _challengeSequenceStateSubscription?.cancel();
+    await _challengeProcessingStateSubscription?.cancel();
+    challengePlayer = null;
+  } catch (e) {
+    print("Erro ao liberar os players: $e");
+  }
 }

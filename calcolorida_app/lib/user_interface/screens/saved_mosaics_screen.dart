@@ -24,12 +24,13 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
   @override
   void initState() {
     super.initState();
-    initializeAudio();
+    initializeMainAudio();
+  initializeChallengeAudio();
   }
 
   @override
   void dispose() {
-    disposeAudio();
+    disposeAllAudio();
     super.dispose();
   }
 
@@ -184,6 +185,7 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
     widget.onMosaicApplied?.call();
     Navigator.pop(context);
 
-    await initializeAudio();
+    await initializeMainAudio();
+    await initializeChallengeAudio();
   }
 }

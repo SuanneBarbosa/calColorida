@@ -63,7 +63,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void dispose() {
-    disposeAudio();
+     disposeAllAudio();
+    // disposeAudio();
     super.dispose();
   }
 
@@ -229,25 +230,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _challengeMosaic = "0.$randomMosaic";
   }
 
-  void _toggleAudioPlayback() {
+  Future <void> _toggleAudioPlayback() async {
     if (_isPlayingAudio) {
-      player?.pause();
-      setState(() {
-        _isPlayingAudio = false;
-      });
-    } else {
-      player?.play();
-      setState(() {
-        _isPlayingAudio = true;
-      });
+    challengePlayer?.pause(); 
+    setState(() {
+      _isPlayingAudio = false;
+    });
+  } else {
+    if (mainPlayer?.playing ?? false) {
+      await stopMainAudio();
     }
+    challengePlayer?.play(); 
+    setState(() {
+      _isPlayingAudio = true;
+    });
   }
+}
 
-  void _repeatAudio() {
+  Future <void> _repeatAudio() async {
     String decimalPart = _challengeMosaic.split('.')[1];
     List<int> digits = decimalPart.split('').map(int.parse).toList();
 
-    playMelodyAudio(
+    await playChallengeMelodyAudio(
       digits: digits,
       durationMs: 500,
       delayMs: 0,
@@ -273,7 +277,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  void _startSoundAndImageChallenge(BuildContext context) {
+  Future <void> _startSoundAndImageChallenge(BuildContext context) async  {
+  //   if (mainPlayer?.playing ?? false) {
+  //   await stopMainAudio();
+  // }
     _controller.processKey('C', context);
     _generateChallengeMosaic();
     setState(() {
@@ -284,7 +291,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     String decimalPart = _challengeMosaic.split('.')[1];
     List<int> digits = decimalPart.split('').map(int.parse).toList();
 
-    playMelodyAudio(
+    await playChallengeMelodyAudio(
       digits: digits,
       durationMs: 500,
       delayMs: 0,
@@ -298,7 +305,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  void _startSoundChallenge(BuildContext context) {
+  Future <void> _startSoundChallenge(BuildContext context) async {
+  //   if (mainPlayer?.playing ?? false) {
+  //   await stopMainAudio(); 
+  // }
     _controller.processKey('C', context);
     _generateChallengeMosaic();
     setState(() {
@@ -309,7 +319,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     String decimalPart = _challengeMosaic.split('.')[1];
     List<int> digits = decimalPart.split('').map(int.parse).toList();
 
-    playMelodyAudio(
+    await playChallengeMelodyAudio(
       digits: digits,
       durationMs: 500,
       delayMs: 0,
@@ -523,7 +533,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     });
                     await SharedPreferencesService.saveInstrument(
                         newInstrument);
-                    await initializeAudio();
+                    await initializeMainAudio();
+                    await initializeChallengeAudio();
                   }
                 },
                 style: const TextStyle(
@@ -595,7 +606,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
                           if (instrument != null) {
                             selectedInstrument = instrument;
-                            initializeAudio();
+                            initializeMainAudio();
+                            initializeChallengeAudio();
                           }
                           if (duration != null) {
                             _noteDurationMs = duration;
@@ -759,9 +771,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       FloatingActionButton(
-                        onPressed: _controller.hasActiveMosaic() &&
-                                _activeChallengeType == null
+                        onPressed: _controller.hasActiveMosaic()
                             ? () {
+                                // Verificação se algum Desafio está tocando
+                                // if (_activeChallengeType != null &&
+                                //     _isPlayingAudio) {
+                                //   setState(() {
+                                //     _isPlayingAudio =
+                                //         false; // Atualiza o estado
+                                //   });
+                                //    stopChallengeAudio();
+                                // }
                                 setState(() {
                                   if (_isPlaying) {
                                     _controller.stopMelody();
@@ -996,7 +1016,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _activeChallengeType = null;
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
-                                        player?.stop();
+                                         challengePlayer?.stop();
+
                                       });
                                     },
                                   ),
@@ -1016,6 +1037,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                     onPressed: () {
                                       setState(() {
                                         _isMinimized = true;
+                                        if (_isPlayingAudio) {
+                                          _isPlayingAudio = false;
+                                           challengePlayer?.stop();
+                                        }
                                       });
                                     },
                                   ),
@@ -1027,7 +1052,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _activeChallengeType = null;
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
-                                        player?.stop();
+                                         challengePlayer?.stop();
+
                                       });
                                     },
                                   ),
@@ -1119,6 +1145,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                     onPressed: () {
                                       setState(() {
                                         _isMinimized = false;
+                                        
                                       });
                                     },
                                   ),
@@ -1130,7 +1157,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _activeChallengeType = null;
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
-                                        player?.stop();
+                                        challengePlayer?.stop();
+
                                       });
                                     },
                                   ),
@@ -1150,6 +1178,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                     onPressed: () {
                                       setState(() {
                                         _isMinimized = true;
+                                        if (_isPlayingAudio) {
+                                          _isPlayingAudio = false;
+                                           challengePlayer?.stop();
+                                        }
                                       });
                                     },
                                   ),
@@ -1161,7 +1193,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _activeChallengeType = null;
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
-                                        player?.stop();
+                                         challengePlayer?.stop();
+
                                       });
                                     },
                                   ),

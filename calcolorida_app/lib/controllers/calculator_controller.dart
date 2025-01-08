@@ -100,7 +100,7 @@ class CalculatorController {
       _calculate(context);
     } else if (operations.contains(key)) {
       if (isLastCharOperation()) {
-      return; // Ignora a entrada
+      return; 
     }
       
       _setOperation(key, context);
@@ -255,7 +255,7 @@ class CalculatorController {
       }
 
       try {
-        await playMelodyAudio(
+        await playMainMelodyAudio(
           digits: digitsToPlay,
           durationMs: durationMs,
           delayMs: delayMs ?? 0,
@@ -291,8 +291,9 @@ class CalculatorController {
   }
 
   Future<void> stopMelody() async {
-    stopPlayback();
-    await stopAudio();
+    // stopPlayback();////////////////////// verificar isso
+    
+    await stopMainAudio(); 
   }
 
   void _setOperation(String op, BuildContext context) {
