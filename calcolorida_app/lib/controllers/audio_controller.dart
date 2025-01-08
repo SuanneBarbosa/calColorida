@@ -55,7 +55,6 @@ Future<void> initializeAudio() async {
           _onNoteStarted!(currentIndex);
         }
       });
-
       
       _processingStateSubscription = player!.processingStateStream.listen((processingState) {
         if (processingState == ProcessingState.completed) {
@@ -174,4 +173,6 @@ Future<void> disposeAudio() async {
   } catch (e) {
     print("Erro ao liberar o player: $e");
   }
+
+  
 }

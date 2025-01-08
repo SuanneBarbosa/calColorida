@@ -10,8 +10,6 @@ import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
 
-
-
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
@@ -42,7 +40,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   int _delayBetweenNotesMs = 0;
 
   final Map<String, Color> digitColors = {
-    '0': Colors.red,
+    '0': Colors.indigo,
     '1': Colors.green,
     '2': Colors.blue,
     '3': Colors.yellow,
@@ -270,7 +268,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _startStandardChallenge(BuildContext context) {
     _controller.processKey('C', context);
     _generateChallengeMosaic();
-
     setState(() {
       _activeChallengeType = 'standard';
     });
@@ -279,7 +276,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _startSoundAndImageChallenge(BuildContext context) {
     _controller.processKey('C', context);
     _generateChallengeMosaic();
-
     setState(() {
       _activeChallengeType = 'soundAndImage';
       _isPlayingAudio = true;
@@ -305,7 +301,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _startSoundChallenge(BuildContext context) {
     _controller.processKey('C', context);
     _generateChallengeMosaic();
-
     setState(() {
       _activeChallengeType = 'sound';
       _isPlayingAudio = true;
@@ -743,6 +738,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             setState(() {
                               _mosaicDigitsPerRow = value.toInt();
                               _controller.mosaicDigitsPerRow = value.toInt();
+                              // Forçar parada se slider for modificado
+                              if (_isPlaying) {
+                                _controller.stopMelody();
+                                _isPlaying = false;
+                                // _currentNoteIndex = null;
+                              }
                             });
                             await SharedPreferencesService
                                 .saveMosaicDigitsPerRow(value.toInt());
@@ -758,33 +759,36 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       FloatingActionButton(
-                        onPressed: () {
-                          setState(() {
-                            if (_isPlaying) {
-                              _controller.stopMelody();
-                              _isPlaying = false;
-                              _currentNoteIndex = null;
-                            } else {
-                              _controller.playMelody(
-                                durationMs: _noteDurationMs,
-                                maxDigits: _maxDigitsInMosaic,
-                                delayMs: _delayBetweenNotesMs,
-                                onNoteStarted: (noteIndex) {
-                                  setState(() {
-                                    _currentNoteIndex = noteIndex;
-                                  });
-                                },
-                                onNoteFinished: (noteIndex) {
-                                  setState(() {
-                                    _currentNoteIndex = null;
+                        onPressed: _controller.hasActiveMosaic() &&
+                                _activeChallengeType == null
+                            ? () {
+                                setState(() {
+                                  if (_isPlaying) {
+                                    _controller.stopMelody();
                                     _isPlaying = false;
-                                  });
-                                },
-                              );
-                              _isPlaying = true;
-                            }
-                          });
-                        },
+                                    _currentNoteIndex = null;
+                                  } else {
+                                    _controller.playMelody(
+                                      durationMs: _noteDurationMs,
+                                      maxDigits: _maxDigitsInMosaic,
+                                      delayMs: _delayBetweenNotesMs,
+                                      onNoteStarted: (noteIndex) {
+                                        setState(() {
+                                          _currentNoteIndex = noteIndex;
+                                        });
+                                      },
+                                      onNoteFinished: (noteIndex) {
+                                        setState(() {
+                                          _currentNoteIndex = null;
+                                          _isPlaying = false;
+                                        });
+                                      },
+                                    );
+                                    _isPlaying = true;
+                                  }
+                                });
+                              }
+                            : null,
                         child: Icon(
                           _isPlaying ? Icons.stop : Icons.play_arrow,
                           color: _isPlaying
@@ -929,7 +933,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 result: _challengeMosaic,
                                 digitColors: digitColors,
                                 decimalPlaces: 400,
-                                digitsPerRow: _mosaicDigitsPerRow,
+                                digitsPerRow: 19,
                                 squareSize:
                                     MediaQuery.of(context).size.width < 400
                                         ? 15.0
@@ -1046,7 +1050,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 result: _challengeMosaic,
                                 digitColors: digitColors,
                                 decimalPlaces: 400,
-                                digitsPerRow: _mosaicDigitsPerRow,
+                                digitsPerRow: 19,
                                 squareSize:
                                     MediaQuery.of(context).size.width < 400
                                         ? 15.0

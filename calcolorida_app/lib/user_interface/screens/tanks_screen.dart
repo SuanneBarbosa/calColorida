@@ -17,6 +17,7 @@ class ThankYouScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
+              // Autores da Versão Original
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -26,16 +27,16 @@ class ThankYouScreen extends StatelessWidget {
                 child: const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Nathalie Sinclair",
+                        "Versão Original",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 20,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
-                         textAlign: TextAlign.center,
-                        softWrap: true,
+                        textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -45,7 +46,16 @@ class ThankYouScreen extends StatelessWidget {
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
-                         textAlign: TextAlign.center,
+                        softWrap: true,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Nathalie Sinclair",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                         softWrap: true,
                       ),
                       SizedBox(height: 10),
@@ -56,8 +66,17 @@ class ThankYouScreen extends StatelessWidget {
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
-                         textAlign: TextAlign.center,
                         softWrap: true,
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        "Versão Atualizada 2025",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -67,19 +86,17 @@ class ThankYouScreen extends StatelessWidget {
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
-                         textAlign: TextAlign.center,
                         softWrap: true,
                       ),
                       SizedBox(height: 10),
                       Text(
                         "Solange Hassan Ahmad Ali Fernandes",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
-                        textAlign: TextAlign.center,
-                        softWrap: true, 
+                        softWrap: true,
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -89,13 +106,14 @@ class ThankYouScreen extends StatelessWidget {
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
-                         textAlign: TextAlign.center,
                         softWrap: true,
                       ),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+              // Autores da Nova Versão
             ],
           ),
         ),

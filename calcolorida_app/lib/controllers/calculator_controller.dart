@@ -63,7 +63,7 @@ class CalculatorController {
   }
 
   Map<String, Color> digitColors = {
-    '0': Colors.red,
+    '0': Colors.indigo,
     '1': Colors.green,
     '2': Colors.blue,
     '3': Colors.yellow,
@@ -153,11 +153,11 @@ class CalculatorController {
 
   void _calculate(BuildContext context) {
     if (_operation.isEmpty) {
-      // _showErrorModal(context, "Nenhuma operação foi definida.");
+      // _showErrorModal(context, "Erro: Nenhuma operação foi definida.");
       return;
     }
     if (_currentNumber.isEmpty) {
-      _showErrorModal(context, "Valor nulo ou vazio.");
+      // _showErrorModal(context, "Erro: Defina o segundo número para realizar a operação.");
       return;
     }
 

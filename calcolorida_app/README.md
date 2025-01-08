@@ -1,6 +1,6 @@
-# calcolorida_app
+# MusicalColorida
 
-Este é o aplicativo Flutter "calcolorida_app", um projeto educativo.
+Este é o aplicativo Flutter "MusicalColorida", um projeto educativo.
 
 ## Como Instalar
 
