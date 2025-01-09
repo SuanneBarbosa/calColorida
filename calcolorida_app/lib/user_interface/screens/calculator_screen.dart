@@ -232,7 +232,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Future <void> _toggleAudioPlayback() async {
     if (_isPlayingAudio) {
-    challengePlayer?.pause(); 
+   await challengePlayer?.pause(); 
     setState(() {
       _isPlayingAudio = false;
     });
@@ -240,7 +240,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (mainPlayer?.playing ?? false) {
       await stopMainAudio();
     }
-    challengePlayer?.play(); 
+   await challengePlayer?.play(); 
     setState(() {
       _isPlayingAudio = true;
     });
@@ -250,6 +250,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Future <void> _repeatAudio() async {
     String decimalPart = _challengeMosaic.split('.')[1];
     List<int> digits = decimalPart.split('').map(int.parse).toList();
+
+     setState(() {
+      _isPlayingAudio = true;
+    });
 
     await playChallengeMelodyAudio(
       digits: digits,
@@ -263,10 +267,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         });
       },
     );
-
-    setState(() {
-      _isPlayingAudio = true;
-    });
+   
   }
 
   void _startStandardChallenge(BuildContext context) {
@@ -773,12 +774,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       FloatingActionButton(
                         onPressed: _controller.hasActiveMosaic()
                             ? () {
-                                // Verificação se algum Desafio está tocando
                                 // if (_activeChallengeType != null &&
                                 //     _isPlayingAudio) {
                                 //   setState(() {
                                 //     _isPlayingAudio =
-                                //         false; // Atualiza o estado
+                                //         false;
                                 //   });
                                 //    stopChallengeAudio();
                                 // }

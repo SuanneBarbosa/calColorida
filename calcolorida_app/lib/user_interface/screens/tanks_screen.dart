@@ -7,7 +7,7 @@ class ThankYouScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // title: const Text("Agradecimentos"),
+        title: const Text("Agradecimentos"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -24,15 +24,15 @@ class ThankYouScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "Agradecimentos",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  // Text(
+                  //   "Agradecimentos",
+                  //   textAlign: TextAlign.center,
+                  //   style: TextStyle(
+                  //     fontSize: 24,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: Colors.white,
+                  //   ),
+                  // ),
                   SizedBox(height: 20),
                   Text(
                     "Versão Original",
@@ -54,7 +54,7 @@ class ThankYouScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   Text(
-                    "Versão Atualizada 2025",
+                    "Versão Atualizada (2025)",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 20,

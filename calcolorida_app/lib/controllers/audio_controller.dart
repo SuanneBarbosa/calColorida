@@ -339,4 +339,7 @@ Future<void> disposeAllAudio() async {
   } catch (e) {
     print("Erro ao liberar os players: $e");
   }
+
+ 
+
 }
