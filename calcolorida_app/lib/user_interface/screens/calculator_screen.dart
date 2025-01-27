@@ -63,7 +63,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void dispose() {
-     disposeAllAudio();
+    disposeAllAudio();
     // disposeAudio();
     super.dispose();
   }
@@ -230,28 +230,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _challengeMosaic = "0.$randomMosaic";
   }
 
-  Future <void> _toggleAudioPlayback() async {
+  Future<void> _toggleAudioPlayback() async {
     if (_isPlayingAudio) {
-   await challengePlayer?.pause(); 
-    setState(() {
-      _isPlayingAudio = false;
-    });
-  } else {
-    if (mainPlayer?.playing ?? false) {
-      await stopMainAudio();
+      await challengePlayer?.pause();
+      setState(() {
+        _isPlayingAudio = false;
+      });
+    } else {
+      if (mainPlayer?.playing ?? false) {
+        await stopMainAudio();
+      }
+      await challengePlayer?.play();
+      setState(() {
+        _isPlayingAudio = true;
+      });
     }
-   await challengePlayer?.play(); 
-    setState(() {
-      _isPlayingAudio = true;
-    });
   }
-}
 
-  Future <void> _repeatAudio() async {
+  Future<void> _repeatAudio() async {
     String decimalPart = _challengeMosaic.split('.')[1];
     List<int> digits = decimalPart.split('').map(int.parse).toList();
 
-     setState(() {
+    setState(() {
       _isPlayingAudio = true;
     });
 
@@ -267,7 +267,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         });
       },
     );
-   
   }
 
   void _startStandardChallenge(BuildContext context) {
@@ -278,10 +277,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  Future <void> _startSoundAndImageChallenge(BuildContext context) async  {
-  //   if (mainPlayer?.playing ?? false) {
-  //   await stopMainAudio();
-  // }
+  Future<void> _startSoundAndImageChallenge(BuildContext context) async {
+    //   if (mainPlayer?.playing ?? false) {
+    //   await stopMainAudio();
+    // }
     _controller.processKey('C', context);
     _generateChallengeMosaic();
     setState(() {
@@ -306,10 +305,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Future <void> _startSoundChallenge(BuildContext context) async {
-  //   if (mainPlayer?.playing ?? false) {
-  //   await stopMainAudio(); 
-  // }
+  Future<void> _startSoundChallenge(BuildContext context) async {
+    //   if (mainPlayer?.playing ?? false) {
+    //   await stopMainAudio();
+    // }
     _controller.processKey('C', context);
     _generateChallengeMosaic();
     setState(() {
@@ -376,49 +375,64 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 children: [
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 30.0),
-                      child: Container(
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(2, 4),
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Apoio',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/IFSP_Logo.png',
-                              height: 70,
-                              fit: BoxFit.contain,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(
+                              height: 1),// Espaço entre o texto e as imagens
+                          Container(
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(2, 4),
+                                ),
+                              ],
                             ),
-                            const SizedBox(
-                              width: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/IFSP_Logo.png',
+                                  height: 70,
+                                  fit: BoxFit.contain,
+                                ),
+                                const SizedBox(width: 5),
+                                Image.asset(
+                                  'assets/images/CNPQ_Logo.png',
+                                  height: 70,
+                                  fit: BoxFit.contain,
+                                ),
+                                const SizedBox(width: 5),
+                                Image.asset(
+                                  'assets/images/RUMO_Logo.png',
+                                  height: 70,
+                                  fit: BoxFit.contain,
+                                ),
+                              ],
                             ),
-                            Image.asset(
-                              'assets/images/CNPQ_Logo.png',
-                              height: 70,
-                              fit: BoxFit.contain,
-                            ),
-                            const SizedBox(width: 5),
-                            Image.asset(
-                              'assets/images/RUMO_Logo.png',
-                              height: 70,
-                              fit: BoxFit.contain,
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Positioned(
+                    Positioned(
                     bottom: 105,
                     left: 240,
                     child: IconButton(
@@ -1016,8 +1030,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _activeChallengeType = null;
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
-                                         challengePlayer?.stop();
-
+                                        challengePlayer?.stop();
                                       });
                                     },
                                   ),
@@ -1039,7 +1052,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _isMinimized = true;
                                         if (_isPlayingAudio) {
                                           _isPlayingAudio = false;
-                                           challengePlayer?.stop();
+                                          challengePlayer?.stop();
                                         }
                                       });
                                     },
@@ -1052,8 +1065,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _activeChallengeType = null;
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
-                                         challengePlayer?.stop();
-
+                                        challengePlayer?.stop();
                                       });
                                     },
                                   ),
@@ -1145,7 +1157,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                     onPressed: () {
                                       setState(() {
                                         _isMinimized = false;
-                                        
                                       });
                                     },
                                   ),
@@ -1158,7 +1169,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
                                         challengePlayer?.stop();
-
                                       });
                                     },
                                   ),
@@ -1180,7 +1190,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _isMinimized = true;
                                         if (_isPlayingAudio) {
                                           _isPlayingAudio = false;
-                                           challengePlayer?.stop();
+                                          challengePlayer?.stop();
                                         }
                                       });
                                     },
@@ -1193,8 +1203,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                         _activeChallengeType = null;
                                         _isMinimized = false;
                                         _isPlayingAudio = false;
-                                         challengePlayer?.stop();
-
+                                        challengePlayer?.stop();
                                       });
                                     },
                                   ),
