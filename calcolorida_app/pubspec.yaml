@@ -40,6 +40,8 @@ dependencies:
   decimal: ^3.0.2
   just_audio: ^0.9.42
   shared_preferences: ^2.3.3
+  flutter_tts: ^3.8.5
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:

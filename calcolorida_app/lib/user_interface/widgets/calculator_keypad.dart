@@ -5,6 +5,42 @@ class CalculatorKeypad extends StatelessWidget {
 
   const CalculatorKeypad({super.key, required this.onKeyPressed});
 
+  String _getSemanticLabel(String label) {
+  switch (label) {
+    case 'C':
+      return 'Limpar';
+    case 'π':
+      return 'Pi';
+    case '√':
+      return 'Raiz quadrada';
+    case '^':
+      return 'Elevado à potência';
+    case '1/x':
+      return 'Inverso';
+    case '!':
+      return 'Fatorial';
+    case '<-':
+      return 'Apagar dígito';
+    case '/':
+      return 'Divisão';
+    case 'x':
+      return 'Multiplicação';
+    case '-':
+      return 'Subtração';
+    case '+':
+      return 'Adição';
+    case '=':
+      return 'Resultado';
+    case '.':
+      return 'Ponto decimal';
+    case 'S':
+      return 'Salvar mosaico';
+    default:
+      return 'Número $label';
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return GridView.count(
@@ -42,25 +78,29 @@ class CalculatorKeypad extends StatelessWidget {
   }
 
   Widget _buildButton(String label, {Color? color, Color? fontColor, double fontSize = 21.0}) {
-    return ElevatedButton(
-      onPressed: () {
-        if (label == 'S') {
-          onKeyPressed('save');
-        } else {
-          onKeyPressed(label);
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color ?? Colors.blue,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    return Semantics(
+  label: _getSemanticLabel(label),
+  button: false,
+  child: ElevatedButton(
+    onPressed: () {
+      if (label == 'S') {
+        onKeyPressed('save');
+      } else {
+        onKeyPressed(label);
+      }
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: color ?? Colors.blue,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(
+        fontSize: fontSize,
+        color: fontColor ?? Colors.white,
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: fontSize, 
-          color: fontColor ?? Colors.white,
-        ),
-      ),
-    );
+    ),
+  ),
+);
   }
 }

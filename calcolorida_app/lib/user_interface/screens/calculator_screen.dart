@@ -9,6 +9,8 @@ import '../screens/saved_mosaics_screen.dart';
 import '../widgets/calculator_keypad.dart';
 import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
+import 'package:calcolorida_app/services/tts_service.dart';
+
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -38,6 +40,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   bool _isMinimized = false;
   bool _ignoreZerosInAudio = false;
   int _delayBetweenNotesMs = 0;
+  final TTSService _ttsService = TTSService();
+  
+bool _autoReadResult = false;
+
 
   final Map<String, Color> digitColors = {
     '0': Colors.indigo,
@@ -56,15 +62,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void initState() {
     super.initState();
     _controller = CalculatorController();
-    // _loadPreferences();
+    // _loadPreferences();/./
     _controller.loadMosaics();
     // initializeAudio();
+    initializeKeypadAudio();
   }
 
   @override
   void dispose() {
     disposeAllAudio();
     // disposeAudio();
+    
     super.dispose();
   }
 
@@ -545,11 +553,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   if (newInstrument != null) {
                     setState(() {
                       selectedInstrument = newInstrument;
+                     
                     });
                     await SharedPreferencesService.saveInstrument(
                         newInstrument);
                     await initializeMainAudio();
                     await initializeChallengeAudio();
+                    await updateSelectedInstrumentForAudio(newInstrument);
                   }
                 },
                 style: const TextStyle(
@@ -584,6 +594,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ],
               ),
             ),
+
+            ListTile(
+  contentPadding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 0.0),
+  title: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Text(
+        'Ler Resultado',
+        style: TextStyle(
+          fontSize: 20,
+        ),
+      ),
+      Switch(
+        value: _autoReadResult,
+        onChanged: (bool value) {
+          setState(() {
+            _autoReadResult = value;
+          });
+        },
+      ),
+    ],
+  ),
+),
+
 
             // ),
 
@@ -830,6 +864,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               : const Color.fromARGB(255, 13, 110, 253),
                         ),
                       ),
+                      const SizedBox(width: 16),
+    
+
                     ],
                   ),
                 ),
@@ -1253,10 +1290,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _handleKeyPress(String key) {
-    setState(() {
-      _controller.processKey(key, context);
-      _currentNoteIndex = -1;
-    });
+    if (RegExp(r'^[0-9]$').hasMatch(key)) {
+  playKeypadSound(int.parse(key));
+}
+   setState(() {
+  _controller.processKey(key, context);
+  _currentNoteIndex = -1;
+
+  // Fala o resultado se necessário
+  if (key == '=' && _autoReadResult && _controller.isResultDisplayed) {
+    final resultadoFalado = _controller.display.replaceAll('.', ',');
+     
+    _ttsService.speak("O resultado é $resultadoFalado");
+  }
+});
 
     if (key == 'save') {
       if (_controller.hasActiveMosaic()) {
