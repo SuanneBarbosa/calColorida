@@ -11,7 +11,6 @@ import '../widgets/result_display.dart';
 import '../widgets/mosaic_display.dart';
 import 'package:calcolorida_app/services/tts_service.dart';
 
-
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
@@ -22,6 +21,7 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
   late CalculatorController _controller;
+
   final int _mosaicDecimalPlaces = 400;
   int _mosaicDigitsPerRow = 19;
   double _squareSize = 20.0;
@@ -41,9 +41,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   bool _ignoreZerosInAudio = false;
   int _delayBetweenNotesMs = 0;
   final TTSService _ttsService = TTSService();
-  
-bool _autoReadResult = false;
 
+  bool _autoReadResult = true;
 
   final Map<String, Color> digitColors = {
     '0': Colors.indigo,
@@ -58,12 +57,27 @@ bool _autoReadResult = false;
     '9': Colors.cyan,
   };
 
+  String _getColorName(Color color) {
+    if (color == Colors.indigo) return 'índigo';
+    if (color == Colors.green) return 'verde';
+    if (color == Colors.blue) return 'azul';
+    if (color == Colors.yellow) return 'amarelo';
+    if (color == Colors.purple) return 'roxo';
+    if (color == Colors.orange) return 'laranja';
+    if (color == Colors.pink) return 'rosa';
+    if (color == Colors.brown) return 'marrom';
+    if (color == Colors.grey) return 'cinza';
+    if (color == Colors.cyan) return 'ciano';
+    return 'desconhecida';
+  }
+
   @override
   void initState() {
     super.initState();
     _controller = CalculatorController();
     // _loadPreferences();/./
     _controller.loadMosaics();
+
     // initializeAudio();
     initializeKeypadAudio();
   }
@@ -72,7 +86,7 @@ bool _autoReadResult = false;
   void dispose() {
     disposeAllAudio();
     // disposeAudio();
-    
+
     super.dispose();
   }
 
@@ -343,30 +357,55 @@ bool _autoReadResult = false;
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _colorLegendExpanded = !_colorLegendExpanded;
-              });
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 16.0),
-              padding: const EdgeInsets.all(3.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(3.0),
-                border: Border.all(color: Colors.blue),
+        leading: Builder(
+          builder: (context) => Semantics(
+            label: 'Abrir menu lateral',
+            button: true,
+            child: ExcludeSemantics(
+              child: IconButton(
+                icon: const Icon(Icons.menu),
+                tooltip: 'Abrir menu lateral',
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    _colorLegendExpanded
-                        ? Icons.palette
-                        : Icons.palette_outlined,
-                    color: Colors.blue,
+            ),
+          ),
+        ),
+        actions: [
+          Builder(
+            builder: (context) => Semantics(
+              label: _colorLegendExpanded
+                  ? 'Ocultar legenda de cores'
+                  : 'Exibir legenda de cores',
+              button: true,
+              child: ExcludeSemantics(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _colorLegendExpanded = !_colorLegendExpanded;
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 16.0),
+                    padding: const EdgeInsets.all(3.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(3.0),
+                      border: Border.all(color: Colors.blue),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _colorLegendExpanded
+                              ? Icons.palette
+                              : Icons.palette_outlined,
+                          color: Colors.blue,
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -381,6 +420,9 @@ bool _autoReadResult = false;
               ),
               child: Stack(
                 children: [
+                  
+                  
+                  
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 20.0),
@@ -388,6 +430,7 @@ bool _autoReadResult = false;
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                         
                           const Text(
                             'Apoio',
                             style: TextStyle(
@@ -398,242 +441,252 @@ bool _autoReadResult = false;
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(
-                              height: 1),// Espaço entre o texto e as imagens
-                          Container(
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(2, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/images/IFSP_Logo.png',
-                                  height: 70,
-                                  fit: BoxFit.contain,
-                                ),
-                                const SizedBox(width: 5),
-                                Image.asset(
-                                  'assets/images/CNPQ_Logo.png',
-                                  height: 70,
-                                  fit: BoxFit.contain,
-                                ),
-                                const SizedBox(width: 5),
-                                Image.asset(
-                                  'assets/images/RUMO_Logo.png',
-                                  height: 70,
-                                  fit: BoxFit.contain,
-                                ),
-                              ],
+                              height: 1), // Espaço entre o texto e as imagens
+                         Semantics(
+                            label:
+                                'Logotipos dos apoiadores: IFSP, CNPQ e RUMO à Educação Matemática Inclusiva',
+                            child: Container(
+                              padding: const EdgeInsets.all(10.0),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 8,
+                                    offset: const Offset(2, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/IFSP_Logo.png',
+                                    height: 70,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Image.asset(
+                                    'assets/images/CNPQ_Logo.png',
+                                    height: 70,
+                                    fit: BoxFit.contain,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Image.asset(
+                                    'assets/images/RUMO_Logo.png',
+                                    height: 70,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                    Positioned(
-                    bottom: 105,
+                   Positioned(
+      bottom: 105,
                     left: 240,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
+      child: Semantics(
+        label: 'Fechar menu',
+        button: true,
+       
+          child: IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            tooltip: 'Fechar menu',
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        
+      ),
+    ),
+                  
                 ],
               ),
             ),
-
             ListTile(
-              leading: const Icon(Icons.zoom_in),
-              subtitle: Row(
-                children: [
-                  Expanded(
-                    child: Slider(
-                      value: _squareSize,
-                      min: _minSquareSize,
-                      max: _maxSquareSize,
-                      divisions: 100,
-                      label: 'Zoom do Mosaico',
-                      onChanged: (double value) async {
-                        setState(() {
-                          _squareSize = value;
-                        });
-                        await SharedPreferencesService.saveZoom(value);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.hourglass_empty),
-              subtitle: Row(
-                children: [
-                  Expanded(
-                    child: Slider(
-                      value: _delayBetweenNotesMs.toDouble(),
-                      min: 0,
-                      max: 5000,
-                      divisions: 50,
-                      label: 'Tempo Entre Notas',
-                      onChanged: (double value) {
-                        setState(() {
-                          _delayBetweenNotesMs = value.toInt();
-                          _controller.delayBetweenNotesMs =
-                              _delayBetweenNotesMs;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.speed),
-              subtitle: Row(
-                children: [
-                  Expanded(
-                    child: Slider(
-                      value: (3000 - _noteDurationMs).toDouble(),
-                      min: 0,
-                      max: 2900,
-                      divisions: 100,
-                      label: 'Velocidade de Reprodução',
-                      onChanged: (value) async {
-                        setState(() {
-                          _noteDurationMs = 3000 - value.toInt();
-                        });
-                        await SharedPreferencesService.saveNoteDuration(
-                            _noteDurationMs);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(
-              color: Colors.grey,
-              thickness: 1,
-              indent: 20,
-              endIndent: 20,
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.music_note),
-              subtitle: DropdownButton<String>(
-                isExpanded: true,
-                value: selectedInstrument,
-                items: instrumentFileNameMap.keys
-                    .map<DropdownMenuItem<String>>((String instrument) {
-                  return DropdownMenuItem<String>(
-                    value: instrument,
-                    child: Text(
-                      instrumentDisplayNameMap[instrument] ?? instrument,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.black,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? newInstrument) async {
-                  if (newInstrument != null) {
-                    setState(() {
-                      selectedInstrument = newInstrument;
-                     
-                    });
-                    await SharedPreferencesService.saveInstrument(
-                        newInstrument);
-                    await initializeMainAudio();
-                    await initializeChallengeAudio();
-                    await updateSelectedInstrumentForAudio(newInstrument);
-                  }
-                },
-                style: const TextStyle(
-                  fontSize: 30,
-                  color: Colors.black,
-                ),
-                dropdownColor: Colors.blue,
-              ),
-            ),
-
-            ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 25.0, vertical: 0.0),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Ignorar Zeros',
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
-                  Switch(
-                    value: _ignoreZerosInAudio,
-                    onChanged: (bool value) {
+              leading: const Icon(Icons.zoom_in, color: Colors.blue),
+              subtitle: Semantics(
+                label:
+                    'Ajustar o zoom do mosaico. Arraste para os lados para aumentar ou diminuir. Zoom atual: ${_squareSize.toStringAsFixed(1)}',
+                child: ExcludeSemantics(
+                  child: Slider(
+                    value: _squareSize,
+                    min: _minSquareSize,
+                    max: _maxSquareSize,
+                    divisions: 100,
+                    label: 'Zoom do Mosaico',
+                    onChanged: (double value) async {
                       setState(() {
-                        _ignoreZerosInAudio = value;
-                        _controller.ignoreZeros = _ignoreZerosInAudio;
+                        _squareSize = value;
+                      });
+                      await SharedPreferencesService.saveZoom(value);
+                    },
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.hourglass_empty, color: Colors.blue),
+              subtitle: Semantics(
+                label:
+                    'Ajustar o tempo entre notas. Arraste para os lados para mudar. Tempo atual: ${_delayBetweenNotesMs} milissegundos.',
+                child: ExcludeSemantics(
+                  child: Slider(
+                    value: _delayBetweenNotesMs.toDouble(),
+                    min: 0,
+                    max: 5000,
+                    divisions: 50,
+                    label: 'Tempo Entre Notas',
+                    onChanged: (double value) {
+                      setState(() {
+                        _delayBetweenNotesMs = value.toInt();
+                        _controller.delayBetweenNotesMs = _delayBetweenNotesMs;
                       });
                     },
                   ),
-                ],
+                ),
               ),
             ),
-
             ListTile(
-  contentPadding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 0.0),
-  title: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      const Text(
-        'Ler Resultado',
-        style: TextStyle(
-          fontSize: 20,
-        ),
-      ),
-      Switch(
-        value: _autoReadResult,
-        onChanged: (bool value) {
-          setState(() {
-            _autoReadResult = value;
-          });
-        },
-      ),
-    ],
-  ),
-),
-
-
-            // ),
-
-            const Divider(
-              color: Colors.grey,
-              thickness: 1,
-              indent: 20,
-              endIndent: 20,
+              leading: const Icon(Icons.speed, color: Colors.blue),
+              subtitle: Semantics(
+                label:
+                    'Ajustar a velocidade de reprodução das notas. Arraste para os lados para mudar. Velocidade atual: ${(3000 - _noteDurationMs).toStringAsFixed(0)}',
+                child: ExcludeSemantics(
+                  child: Slider(
+                    value: (3000 - _noteDurationMs).toDouble(),
+                    min: 0,
+                    max: 2900,
+                    divisions: 100,
+                    label: 'Velocidade de Reprodução',
+                    onChanged: (value) async {
+                      setState(() {
+                        _noteDurationMs = 3000 - value.toInt();
+                      });
+                      await SharedPreferencesService.saveNoteDuration(
+                          _noteDurationMs);
+                    },
+                  ),
+                ),
+              ),
             ),
-
             ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('Mosaicos Salvos',
-                  style: const TextStyle(
-                    fontSize: 20,
-                  )),
+              leading: const Icon(Icons.music_note, color: Colors.blue),
+              subtitle: Semantics(
+                label:
+                    'Selecionar instrumento musical atual: ${instrumentDisplayNameMap[selectedInstrument] ?? selectedInstrument}',
+                child: ExcludeSemantics(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: selectedInstrument,
+                    items: instrumentFileNameMap.keys
+                        .map<DropdownMenuItem<String>>((String instrument) {
+                      return DropdownMenuItem<String>(
+                        value: instrument,
+                        child: Text(
+                          instrumentDisplayNameMap[instrument] ?? instrument,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: Colors.black,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newInstrument) async {
+                      if (newInstrument != null) {
+                        setState(() {
+                          selectedInstrument = newInstrument;
+                        });
+                        await SharedPreferencesService.saveInstrument(
+                            newInstrument);
+                        await initializeMainAudio();
+                        await initializeChallengeAudio();
+                        await updateSelectedInstrumentForAudio(newInstrument);
+                      }
+                    },
+                    style: const TextStyle(
+                      fontSize: 30,
+                      color: Colors.black,
+                    ),
+                    dropdownColor: Colors.blue,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.no_accounts, color: Colors.blue),
+              subtitle: Semantics(
+                label: _ignoreZerosInAudio
+                    ? 'Ignorar zeros ativado. Arraste com dois dedos para desativar.'
+                    : 'Ignorar zeros desativado. Arraste com dois dedos para ativar.',
+                toggled: _ignoreZerosInAudio,
+                child: ExcludeSemantics(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Ignorar Zeros',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Switch(
+                        value: _ignoreZerosInAudio,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _ignoreZerosInAudio = value;
+                            _controller.ignoreZeros = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.record_voice_over, color: Colors.blue),
+              subtitle: Semantics(
+                label: _autoReadResult
+                    ? 'Leitura automática de resultados ativada. Arraste com dois dedos para desativar.'
+                    : 'Leitura automática de resultados desativada. Arraste com dois dedos para ativar.',
+                toggled: _autoReadResult,
+                child: ExcludeSemantics(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Ler Resultado',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Switch(
+                        value: _autoReadResult,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _autoReadResult = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.list, color: Colors.blue),
+              title: Semantics(
+                label: 'Abrir a seção de mosaicos salvos',
+                button: true,
+                child: const ExcludeSemantics(
+                  child: Text(
+                    'Mosaicos Salvos',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              ),
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -649,18 +702,13 @@ bool _autoReadResult = false;
                             .getMosaicDigitsPerRow();
 
                         setState(() {
-                          if (zoom != null) {
-                            _squareSize = zoom;
-                          }
-
+                          if (zoom != null) _squareSize = zoom;
                           if (instrument != null) {
                             selectedInstrument = instrument;
                             initializeMainAudio();
                             initializeChallengeAudio();
                           }
-                          if (duration != null) {
-                            _noteDurationMs = duration;
-                          }
+                          if (duration != null) _noteDurationMs = duration;
                           if (digitsPerRow != null) {
                             _mosaicDigitsPerRow = digitsPerRow;
                             _controller.mosaicDigitsPerRow = digitsPerRow;
@@ -673,11 +721,15 @@ bool _autoReadResult = false;
               },
             ),
             ListTile(
-              leading: const Icon(Icons.flag),
-              title: const Text(
-                'Desafios',
-                style: TextStyle(
-                  fontSize: 20,
+              leading: const Icon(Icons.flag, color: Colors.blue),
+              title: Semantics(
+                label: 'Abrir a seção de desafios',
+                button: true,
+                child: const ExcludeSemantics(
+                  child: Text(
+                    'Desafios',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
               ),
               onTap: () {
@@ -685,13 +737,16 @@ bool _autoReadResult = false;
                 _showChallengesModal();
               },
             ),
-
             ListTile(
-              leading: const Icon(Icons.help_outline),
-              title: const Text(
-                'Instruções de Uso',
-                style: TextStyle(
-                  fontSize: 20,
+              leading: const Icon(Icons.help_outline, color: Colors.blue),
+              title: Semantics(
+                label: 'Abrir a página de instruções de uso',
+                button: true,
+                child: const ExcludeSemantics(
+                  child: Text(
+                    'Instruções de Uso',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
               ),
               onTap: () {
@@ -703,11 +758,15 @@ bool _autoReadResult = false;
               },
             ),
             ListTile(
-              leading: const Icon(Icons.handshake),
-              title: const Text(
-                'Agradecimentos',
-                style: TextStyle(
-                  fontSize: 20,
+              leading: const Icon(Icons.handshake, color: Colors.blue),
+              title: Semantics(
+                label: 'Abrir a página de agradecimentos',
+                button: true,
+                child: const ExcludeSemantics(
+                  child: Text(
+                    'Agradecimentos',
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
               ),
               onTap: () {
@@ -731,21 +790,27 @@ bool _autoReadResult = false;
                     spacing: 2.0,
                     runSpacing: 3.0,
                     children: digitColors.entries.map((entry) {
-                      return Container(
-                        width: 30,
-                        height: 22,
-                        decoration: BoxDecoration(
-                          color: entry.value,
-                          borderRadius: BorderRadius.circular(4.0),
-                          border: Border.all(color: Colors.black),
-                        ),
-                        child: Center(
-                          child: Text(
-                            entry.key,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                      return Semantics(
+                        label:
+                            'Número ${entry.key}, cor ${_getColorName(entry.value)}',
+                        child: ExcludeSemantics(
+                          child: Container(
+                            width: 30,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: entry.value,
+                              borderRadius: BorderRadius.circular(4.0),
+                              border: Border.all(color: Colors.black),
+                            ),
+                            child: Center(
+                              child: Text(
+                                entry.key,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -753,123 +818,135 @@ bool _autoReadResult = false;
                     }).toList(),
                   ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height > 740 &&
-                          MediaQuery.of(context).size.width < 1024
-                      ? 330
-                      : 200,
-                  child: MosaicDisplay(
-                    result: _controller.isResultDisplayed
-                        ? _controller.display
-                        : '',
-                    digitColors: _controller.digitColors,
-                    decimalPlaces: _mosaicDecimalPlaces,
-                    digitsPerRow: _mosaicDigitsPerRow,
-                    squareSize: _squareSize,
-                    currentNoteIndex: _currentNoteIndex,
-                    onMaxDigitsCalculated: (maxDigits) {
-                      setState(() {
-                        _maxDigitsInMosaic = maxDigits;
-                      });
-                    },
-                    onNoteTap: (index) {},
-                  ),
-                ),
+               ExcludeSemantics(
+  child: SizedBox(
+    height: MediaQuery.of(context).size.height > 740 &&
+            MediaQuery.of(context).size.width < 1024
+        ? 330
+        : 200,
+    child: MosaicDisplay(
+      result: _controller.isResultDisplayed ? _controller.display : '',
+      digitColors: _controller.digitColors,
+      decimalPlaces: _mosaicDecimalPlaces,
+      digitsPerRow: _mosaicDigitsPerRow,
+      squareSize: _squareSize,
+      currentNoteIndex: _currentNoteIndex,
+      onMaxDigitsCalculated: (maxDigits) {
+        setState(() {
+          _maxDigitsInMosaic = maxDigits;
+        });
+      },
+      onNoteTap: (index) {},
+    ),
+  ),
+),
                 SizedBox(
                   width: MediaQuery.of(context).size.width > 711 ? 600 : 350,
                   height: 50,
-                  child: Row(
-                    children: [
-                      Text(
-                        '$_mosaicDigitsPerRow',
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                        ),
-                      ),
-                      Expanded(
-                        child: Slider(
-                          value: _controller.mosaicDigitsPerRow.toDouble(),
-                          min: 1,
-                          max: 40,
-                          divisions: 100,
-                          label: 'Padrões do Mosaico',
-                          onChanged: (double value) async {
-                            setState(() {
-                              _mosaicDigitsPerRow = value.toInt();
-                              _controller.mosaicDigitsPerRow = value.toInt();
-                              // Forçar parada se slider for modificado
-                              if (_isPlaying) {
-                                _controller.stopMelody();
-                                _isPlaying = false;
-                                // _currentNoteIndex = null;
-                              }
-                            });
-                            await SharedPreferencesService
-                                .saveMosaicDigitsPerRow(value.toInt());
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.width > 1400 ? 100 : 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FloatingActionButton(
-                        onPressed: _controller.hasActiveMosaic()
-                            ? () {
-                                // if (_activeChallengeType != null &&
-                                //     _isPlayingAudio) {
-                                //   setState(() {
-                                //     _isPlayingAudio =
-                                //         false;
-                                //   });
-                                //    stopChallengeAudio();
-                                // }
+                  child: Semantics(
+                    label:
+                        'Ajustar número de colunas do mosaico. Valor atual: $_mosaicDigitsPerRow colunas',
+                    child: ExcludeSemantics(
+                      child: Row(
+                        children: [
+                          Text(
+                            '$_mosaicDigitsPerRow',
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
+                            ),
+                          ),
+                          Expanded(
+                            child: Slider(
+                              value: _controller.mosaicDigitsPerRow.toDouble(),
+                              min: 1,
+                              max: 40,
+                              divisions: 100,
+                              label: 'Padrões do Mosaico',
+                              onChanged: (double value) async {
                                 setState(() {
+                                  _mosaicDigitsPerRow = value.toInt();
+                                  _controller.mosaicDigitsPerRow =
+                                      value.toInt();
+
                                   if (_isPlaying) {
                                     _controller.stopMelody();
                                     _isPlaying = false;
-                                    _currentNoteIndex = null;
-                                  } else {
-                                    _controller.playMelody(
-                                      durationMs: _noteDurationMs,
-                                      maxDigits: _maxDigitsInMosaic,
-                                      delayMs: _delayBetweenNotesMs,
-                                      onNoteStarted: (noteIndex) {
-                                        setState(() {
-                                          _currentNoteIndex = noteIndex;
-                                        });
-                                      },
-                                      onNoteFinished: (noteIndex) {
-                                        setState(() {
-                                          _currentNoteIndex = null;
-                                          _isPlaying = false;
-                                        });
-                                      },
-                                    );
-                                    _isPlaying = true;
                                   }
                                 });
-                              }
-                            : null,
-                        child: Icon(
-                          _isPlaying ? Icons.stop : Icons.play_arrow,
-                          color: _isPlaying
-                              ? const Color.fromARGB(255, 84, 173, 255)
-                              : const Color.fromARGB(255, 13, 110, 253),
-                        ),
+                                await SharedPreferencesService
+                                    .saveMosaicDigitsPerRow(value.toInt());
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-    
-
-                    ],
+                    ),
                   ),
                 ),
+              SizedBox(
+  height: MediaQuery.of(context).size.width > 1400 ? 100 : 50,
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Semantics(
+        label: _controller.hasActiveMosaic()
+            ? (_isPlaying
+                ? 'Parar áudio do mosaico'
+                : 'Tocar áudio do mosaico')
+            : 'Botão desativado. Nenhum mosaico na tela',
+        button: true,
+        enabled: _controller.hasActiveMosaic(),
+        child: ExcludeSemantics(
+          child: FloatingActionButton(
+            onPressed: _controller.hasActiveMosaic()
+                ? () {
+                  
+                    setState(() {
+                      if (_isPlaying) {
+                        _controller.stopMelody();
+                        _isPlaying = false;
+                        _currentNoteIndex = null;
+                      } else {
+                        _controller.playMelody(
+                          durationMs: _noteDurationMs,
+                          maxDigits: _maxDigitsInMosaic,
+                          delayMs: _delayBetweenNotesMs,
+                          onNoteStarted: (noteIndex) {
+                            setState(() {
+                              _currentNoteIndex = noteIndex;
+                            });
+                          },
+                          onNoteFinished: (noteIndex) {
+                            setState(() {
+                              _currentNoteIndex = null;
+                              _isPlaying = false;
+                            });
+                          },
+                        );
+                        _isPlaying = true;
+                      }
+                    });
+                  }
+                : null,
+            tooltip: _isPlaying ? 'Parar' : 'Tocar',
+            child: Icon(
+              _isPlaying ? Icons.stop : Icons.play_arrow,
+              color: _isPlaying
+                  ? const Color.fromARGB(255, 84, 173, 255)
+                  : const Color.fromARGB(255, 13, 110, 253),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(width: 16),
+    ],
+  ),
+),
+
+
+               
                 const SizedBox(height: 10),
                 SizedBox(
                   width: 310,
@@ -882,17 +959,18 @@ bool _autoReadResult = false;
                     child: Column(
                       children: [
                         const SizedBox(height: 8),
-                        SizedBox(
-                          width: 280,
-                          height: 50,
-                          child: ResultDisplay(
-                            display: _controller.display,
-                            operation: _controller.expression,
-                            currentNoteIndex: _currentNoteIndex,
-                            digitColors: _controller.digitColors,
-                          ),
-                          // ),
-                        ),
+                       ExcludeSemantics(
+  child: SizedBox(
+    width: 280,
+    height: 50,
+    child: ResultDisplay(
+      display: _controller.display,
+      operation: _controller.expression,
+      currentNoteIndex: _currentNoteIndex,
+      digitColors: _controller.digitColors,
+    ),
+  ),
+),
                         const SizedBox(height: 5),
                         SizedBox(
                           width: 280,
@@ -1291,19 +1369,31 @@ bool _autoReadResult = false;
 
   void _handleKeyPress(String key) {
     if (RegExp(r'^[0-9]$').hasMatch(key)) {
-  playKeypadSound(int.parse(key));
-}
-   setState(() {
-  _controller.processKey(key, context);
-  _currentNoteIndex = -1;
+      playKeypadSound(int.parse(key));
+    }
+    setState(() {
+      _controller.processKey(key, context);
+      _currentNoteIndex = -1;
+      if (key == 'C') {
+      // Quando limpa a tela, para o estado de reprodução
+      _isPlaying = false;
+      _currentNoteIndex = null;
+    }
 
-  // Fala o resultado se necessário
-  if (key == '=' && _autoReadResult && _controller.isResultDisplayed) {
-    final resultadoFalado = _controller.display.replaceAll('.', ',');
-     
-    _ttsService.speak("O resultado é $resultadoFalado");
-  }
-});
+      // Fala o resultado se necessário
+      if (key == '=' && _autoReadResult && _controller.isResultDisplayed) {
+        var raw = _controller.display.replaceAll('.', ',');
+        const maxChars = 20;
+        String toSpeak;
+        if (raw.length > maxChars) {
+          toSpeak = raw.substring(0, maxChars) +
+              " … e mais ${raw.length - maxChars} caracteres";
+        } else {
+          toSpeak = raw;
+        }
+        _ttsService.speak("O resultado é $toSpeak");
+      }
+    });
 
     if (key == 'save') {
       if (_controller.hasActiveMosaic()) {
