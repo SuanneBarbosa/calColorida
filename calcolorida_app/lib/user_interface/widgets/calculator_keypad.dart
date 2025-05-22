@@ -78,29 +78,34 @@ class CalculatorKeypad extends StatelessWidget {
   }
 
   Widget _buildButton(String label, {Color? color, Color? fontColor, double fontSize = 21.0}) {
-    return Semantics(
-  label: _getSemanticLabel(label),
-  button: false,
-  child: ElevatedButton(
-    onPressed: () {
-      if (label == 'S') {
-        onKeyPressed('save');
-      } else {
-        onKeyPressed(label);
-      }
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: color ?? Colors.blue,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        fontSize: fontSize,
-        color: fontColor ?? Colors.white,
+  return Semantics(
+    label: _getSemanticLabel(label),
+    button: true,
+    child: ExcludeSemantics(
+      child: ElevatedButton(
+        onPressed: () {
+          if (label == 'S') {
+            onKeyPressed('save');
+          } else {
+            onKeyPressed(label);
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color ?? Colors.blue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: fontColor ?? Colors.white,
+          ),
+        ),
       ),
     ),
-  ),
-);
-  }
+  );
+}
+
 }

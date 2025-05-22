@@ -76,39 +76,39 @@ bool _autoReadResult = false;
     super.dispose();
   }
 
-  Future<void> _loadPreferences() async {
-    await _controller.loadSettings();
+  // Future<void> _loadPreferences() async {
+  //   await _controller.loadSettings();
 
-    final zoom = await SharedPreferencesService.getZoom();
-    final savedInstrument = await SharedPreferencesService.getInstrument();
-    final result = await SharedPreferencesService.getResult();
-    final operation = await SharedPreferencesService.getOperation();
-    final duration = await SharedPreferencesService.getNoteDuration();
-    final mosaicDigitsPerRow =
-        await SharedPreferencesService.getMosaicDigitsPerRow();
+  //   final zoom = await SharedPreferencesService.getZoom();
+  //   final savedInstrument = await SharedPreferencesService.getInstrument();
+  //   final result = await SharedPreferencesService.getResult();
+  //   final operation = await SharedPreferencesService.getOperation();
+  //   final duration = await SharedPreferencesService.getNoteDuration();
+  //   final mosaicDigitsPerRow =
+  //       await SharedPreferencesService.getMosaicDigitsPerRow();
 
-    setState(() {
-      _squareSize = zoom ?? 20.0;
+  //   setState(() {
+  //     _squareSize = zoom ?? 20.0;
 
-      if (savedInstrument != null) {
-        selectedInstrument = savedInstrument;
-      } else {
-        selectedInstrument = 'piano';
-      }
+  //     if (savedInstrument != null) {
+  //       selectedInstrument = savedInstrument;
+  //     } else {
+  //       selectedInstrument = 'piano';
+  //     }
 
-      if (result != null && operation != null) {
-        _controller.loadMosaic(operation, result);
-      }
+  //     if (result != null && operation != null) {
+  //       _controller.loadMosaic(operation, result);
+  //     }
 
-      if (duration != null) {
-        _noteDurationMs = duration;
-      }
-      if (mosaicDigitsPerRow != null) {
-        _mosaicDigitsPerRow = mosaicDigitsPerRow;
-        _controller.mosaicDigitsPerRow = mosaicDigitsPerRow;
-      }
-    });
-  }
+  //     if (duration != null) {
+  //       _noteDurationMs = duration;
+  //     }
+  //     if (mosaicDigitsPerRow != null) {
+  //       _mosaicDigitsPerRow = mosaicDigitsPerRow;
+  //       _controller.mosaicDigitsPerRow = mosaicDigitsPerRow;
+  //     }
+  //   });
+  // }
 
   void _showChallengesModal() {
     showModalBottomSheet(
