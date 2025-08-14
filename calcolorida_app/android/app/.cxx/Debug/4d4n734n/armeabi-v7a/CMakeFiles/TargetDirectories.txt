@@ -1,2 +1,0 @@
-C:/Users/suann/projetos-flutter/calColorida/calcolorida_app/android/app/.cxx/Debug/4d4n734n/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/Users/suann/projetos-flutter/calColorida/calcolorida_app/android/app/.cxx/Debug/4d4n734n/armeabi-v7a/CMakeFiles/rebuild_cache.dir

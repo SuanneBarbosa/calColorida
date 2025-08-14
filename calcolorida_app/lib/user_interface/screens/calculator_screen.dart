@@ -61,8 +61,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (color == Colors.indigo) return 'índigo';
     if (color == Colors.green) return 'verde';
     if (color == Colors.blue) return 'azul';
-    if (color == Colors.yellow) return 'amarelo';
-    if (color == Colors.purple) return 'roxo';
+    if (color == Colors.yellow) return 'amarela';
+    if (color == Colors.purple) return 'roxa';
     if (color == Colors.orange) return 'laranja';
     if (color == Colors.pink) return 'rosa';
     if (color == Colors.brown) return 'marrom';
@@ -89,40 +89,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     super.dispose();
   }
-
-  // Future<void> _loadPreferences() async {
-  //   await _controller.loadSettings();
-
-  //   final zoom = await SharedPreferencesService.getZoom();
-  //   final savedInstrument = await SharedPreferencesService.getInstrument();
-  //   final result = await SharedPreferencesService.getResult();
-  //   final operation = await SharedPreferencesService.getOperation();
-  //   final duration = await SharedPreferencesService.getNoteDuration();
-  //   final mosaicDigitsPerRow =
-  //       await SharedPreferencesService.getMosaicDigitsPerRow();
-
-  //   setState(() {
-  //     _squareSize = zoom ?? 20.0;
-
-  //     if (savedInstrument != null) {
-  //       selectedInstrument = savedInstrument;
-  //     } else {
-  //       selectedInstrument = 'piano';
-  //     }
-
-  //     if (result != null && operation != null) {
-  //       _controller.loadMosaic(operation, result);
-  //     }
-
-  //     if (duration != null) {
-  //       _noteDurationMs = duration;
-  //     }
-  //     if (mosaicDigitsPerRow != null) {
-  //       _mosaicDigitsPerRow = mosaicDigitsPerRow;
-  //       _controller.mosaicDigitsPerRow = mosaicDigitsPerRow;
-  //     }
-  //   });
-  // }
 
   void _showChallengesModal() {
     showModalBottomSheet(
@@ -226,7 +192,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-//Gerador de Desafio
   void _generateChallengeMosaic() {
     final rand = Random();
     const length = 247; //
@@ -420,9 +385,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
               child: Stack(
                 children: [
-                  
-                  
-                  
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 20.0),
@@ -430,7 +392,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                         
                           const Text(
                             'Apoio',
                             style: TextStyle(
@@ -440,9 +401,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(
-                              height: 1), // Espaço entre o texto e as imagens
-                         Semantics(
+                          const SizedBox(height: 1),
+                          Semantics(
                             label:
                                 'Logotipos dos apoiadores: IFSP, CNPQ e RUMO à Educação Matemática Inclusiva',
                             child: Container(
@@ -487,24 +447,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       ),
                     ),
                   ),
-                   Positioned(
-      bottom: 105,
+                  Positioned(
+                    bottom: 105,
                     left: 240,
-      child: Semantics(
-        label: 'Fechar menu',
-        button: true,
-       
-          child: IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            tooltip: 'Fechar menu',
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        
-      ),
-    ),
-                  
+                    child: Semantics(
+                      label: 'Fechar menu',
+                      button: true,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        tooltip: 'Fechar menu',
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -651,15 +608,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               leading: const Icon(Icons.record_voice_over, color: Colors.blue),
               subtitle: Semantics(
                 label: _autoReadResult
-                    ? 'Leitura automática de resultados ativada. Arraste com dois dedos para desativar.'
-                    : 'Leitura automática de resultados desativada. Arraste com dois dedos para ativar.',
+                    ? 'Fala automática de resultados ativada. Arraste com dois dedos para desativar.'
+                    : 'Fala automática de resultados desativada. Arraste com dois dedos para ativar.',
                 toggled: _autoReadResult,
                 child: ExcludeSemantics(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Ler Resultado',
+                        'Falar Resultado',
                         style: TextStyle(fontSize: 20),
                       ),
                       Switch(
@@ -818,28 +775,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     }).toList(),
                   ),
                 const SizedBox(height: 10),
-               ExcludeSemantics(
-  child: SizedBox(
-    height: MediaQuery.of(context).size.height > 740 &&
-            MediaQuery.of(context).size.width < 1024
-        ? 330
-        : 200,
-    child: MosaicDisplay(
-      result: _controller.isResultDisplayed ? _controller.display : '',
-      digitColors: _controller.digitColors,
-      decimalPlaces: _mosaicDecimalPlaces,
-      digitsPerRow: _mosaicDigitsPerRow,
-      squareSize: _squareSize,
-      currentNoteIndex: _currentNoteIndex,
-      onMaxDigitsCalculated: (maxDigits) {
-        setState(() {
-          _maxDigitsInMosaic = maxDigits;
-        });
-      },
-      onNoteTap: (index) {},
-    ),
-  ),
-),
+                ExcludeSemantics(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height > 740 &&
+                            MediaQuery.of(context).size.width < 1024
+                        ? 330
+                        : 200,
+                    child: MosaicDisplay(
+                      result: _controller.isResultDisplayed
+                          ? _controller.display
+                          : '',
+                      digitColors: _controller.digitColors,
+                      decimalPlaces: _mosaicDecimalPlaces,
+                      digitsPerRow: _mosaicDigitsPerRow,
+                      squareSize: _squareSize,
+                      currentNoteIndex: _currentNoteIndex,
+                      onMaxDigitsCalculated: (maxDigits) {
+                        setState(() {
+                          _maxDigitsInMosaic = maxDigits;
+                        });
+                      },
+                      onNoteTap: (index) {},
+                    ),
+                  ),
+                ),
                 SizedBox(
                   width: MediaQuery.of(context).size.width > 711 ? 600 : 350,
                   height: 50,
@@ -885,68 +844,64 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ),
                   ),
                 ),
-              SizedBox(
-  height: MediaQuery.of(context).size.width > 1400 ? 100 : 50,
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Semantics(
-        label: _controller.hasActiveMosaic()
-            ? (_isPlaying
-                ? 'Parar áudio do mosaico'
-                : 'Tocar áudio do mosaico')
-            : 'Botão desativado. Nenhum mosaico na tela',
-        button: true,
-        enabled: _controller.hasActiveMosaic(),
-        child: ExcludeSemantics(
-          child: FloatingActionButton(
-            onPressed: _controller.hasActiveMosaic()
-                ? () {
-                  
-                    setState(() {
-                      if (_isPlaying) {
-                        _controller.stopMelody();
-                        _isPlaying = false;
-                        _currentNoteIndex = null;
-                      } else {
-                        _controller.playMelody(
-                          durationMs: _noteDurationMs,
-                          maxDigits: _maxDigitsInMosaic,
-                          delayMs: _delayBetweenNotesMs,
-                          onNoteStarted: (noteIndex) {
-                            setState(() {
-                              _currentNoteIndex = noteIndex;
-                            });
-                          },
-                          onNoteFinished: (noteIndex) {
-                            setState(() {
-                              _currentNoteIndex = null;
-                              _isPlaying = false;
-                            });
-                          },
-                        );
-                        _isPlaying = true;
-                      }
-                    });
-                  }
-                : null,
-            tooltip: _isPlaying ? 'Parar' : 'Tocar',
-            child: Icon(
-              _isPlaying ? Icons.stop : Icons.play_arrow,
-              color: _isPlaying
-                  ? const Color.fromARGB(255, 84, 173, 255)
-                  : const Color.fromARGB(255, 13, 110, 253),
-            ),
-          ),
-        ),
-      ),
-      const SizedBox(width: 16),
-    ],
-  ),
-),
-
-
-               
+                SizedBox(
+                  height: MediaQuery.of(context).size.width > 1400 ? 100 : 50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Semantics(
+                        label: _controller.hasActiveMosaic()
+                            ? (_isPlaying
+                                ? 'Parar áudio do mosaico'
+                                : 'Tocar áudio do mosaico')
+                            : 'Botão desativado. Nenhum mosaico na tela',
+                        button: true,
+                        enabled: _controller.hasActiveMosaic(),
+                        child: ExcludeSemantics(
+                          child: FloatingActionButton(
+                            onPressed: _controller.hasActiveMosaic()
+                                ? () {
+                                    setState(() {
+                                      if (_isPlaying) {
+                                        _controller.stopMelody();
+                                        _isPlaying = false;
+                                        _currentNoteIndex = null;
+                                      } else {
+                                        _controller.playMelody(
+                                          durationMs: _noteDurationMs,
+                                          maxDigits: _maxDigitsInMosaic,
+                                          delayMs: _delayBetweenNotesMs,
+                                          onNoteStarted: (noteIndex) {
+                                            setState(() {
+                                              _currentNoteIndex = noteIndex;
+                                            });
+                                          },
+                                          onNoteFinished: (noteIndex) {
+                                            setState(() {
+                                              _currentNoteIndex = null;
+                                              _isPlaying = false;
+                                            });
+                                          },
+                                        );
+                                        _isPlaying = true;
+                                      }
+                                    });
+                                  }
+                                : null,
+                            tooltip: _isPlaying ? 'Parar' : 'Tocar',
+                            child: Icon(
+                              _isPlaying ? Icons.stop : Icons.play_arrow,
+                              color: _isPlaying
+                                  ? const Color.fromARGB(255, 84, 173, 255)
+                                  : const Color.fromARGB(255, 13, 110, 253),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 10),
                 SizedBox(
                   width: 310,
@@ -959,18 +914,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     child: Column(
                       children: [
                         const SizedBox(height: 8),
-                       ExcludeSemantics(
-  child: SizedBox(
-    width: 280,
-    height: 50,
-    child: ResultDisplay(
-      display: _controller.display,
-      operation: _controller.expression,
-      currentNoteIndex: _currentNoteIndex,
-      digitColors: _controller.digitColors,
-    ),
-  ),
-),
+                        ExcludeSemantics(
+                          child: SizedBox(
+                            width: 280,
+                            height: 50,
+                            child: ResultDisplay(
+                              display: _controller.display,
+                              operation: _controller.expression,
+                              currentNoteIndex: _currentNoteIndex,
+                              digitColors: _controller.digitColors,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 5),
                         SizedBox(
                           width: 280,
@@ -1016,24 +971,36 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               ),
                               Row(
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.expand_more,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isMinimized = false;
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Expandir desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.expand_more,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isMinimized = false;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _activeChallengeType = null;
-                                        _isMinimized = false;
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Fechar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _activeChallengeType = null;
+                                            _isMinimized = false;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1045,24 +1012,36 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.expand_less,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isMinimized = true;
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Minimizar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.expand_less,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isMinimized = true;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _activeChallengeType = null;
-                                        _isMinimized = false;
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Fechar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _activeChallengeType = null;
+                                            _isMinimized = false;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1078,7 +1057,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   textAlign: TextAlign.center,
                                 ),
                               ),
-                              MosaicDisplay(
+                              ExcludeSemantics(
+                                  child: MosaicDisplay(
                                 result: _challengeMosaic,
                                 digitColors: digitColors,
                                 decimalPlaces: 400,
@@ -1090,7 +1070,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 currentNoteIndex: null,
                                 onNoteTap: null,
                                 onMaxDigitsCalculated: null,
-                              ),
+                              )),
                               const SizedBox(height: 20),
                             ],
                           ),
@@ -1128,26 +1108,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               ),
                               Row(
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.expand_more,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isMinimized = false;
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Expandir desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.expand_more,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isMinimized = false;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _activeChallengeType = null;
-                                        _isMinimized = false;
-                                        _isPlayingAudio = false;
-                                        challengePlayer?.stop();
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Fechar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _activeChallengeType = null;
+                                            _isMinimized = false;
+                                            _isPlayingAudio = false;
+                                            challengePlayer?.stop();
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1159,30 +1151,42 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.expand_less,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isMinimized = true;
-                                        if (_isPlayingAudio) {
-                                          _isPlayingAudio = false;
-                                          challengePlayer?.stop();
-                                        }
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Minimizar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.expand_less,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isMinimized = true;
+                                            if (_isPlayingAudio) {
+                                              _isPlayingAudio = false;
+                                              challengePlayer?.stop();
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _activeChallengeType = null;
-                                        _isMinimized = false;
-                                        _isPlayingAudio = false;
-                                        challengePlayer?.stop();
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Fechar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _activeChallengeType = null;
+                                            _isMinimized = false;
+                                            _isPlayingAudio = false;
+                                            challengePlayer?.stop();
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1199,35 +1203,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              MosaicDisplay(
-                                result: _challengeMosaic,
-                                digitColors: digitColors,
-                                decimalPlaces: 400,
-                                digitsPerRow: 19,
-                                squareSize:
-                                    MediaQuery.of(context).size.width < 400
-                                        ? 15.0
-                                        : 20.0,
-                                currentNoteIndex: null,
+                              ExcludeSemantics(
+                                child: MosaicDisplay(
+                                  result: _challengeMosaic,
+                                  digitColors: digitColors,
+                                  decimalPlaces: 400,
+                                  digitsPerRow: 19,
+                                  squareSize:
+                                      MediaQuery.of(context).size.width < 400
+                                          ? 15.0
+                                          : 20.0,
+                                  currentNoteIndex: null,
+                                ),
                               ),
                               const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ElevatedButton.icon(
+                              Semantics(
+                                label: _isPlayingAudio
+                                    ? 'Pausar áudio do desafio'
+                                    : 'Reproduzir áudio do desafio',
+                                button: true,
+                                child: ExcludeSemantics(
+                                  child: ElevatedButton.icon(
                                     onPressed: _isPlayingAudio
                                         ? _toggleAudioPlayback
                                         : _repeatAudio,
-                                    icon: Icon(
-                                      _isPlayingAudio
-                                          ? Icons.pause
-                                          : Icons.replay,
-                                    ),
-                                    label: Text(
-                                      _isPlayingAudio ? "Pausar" : "Reproduzir",
-                                    ),
+                                    icon: Icon(_isPlayingAudio
+                                        ? Icons.pause
+                                        : Icons.replay),
+                                    label: Text(_isPlayingAudio
+                                        ? "Pausar"
+                                        : "Reproduzir"),
                                   ),
-                                ],
+                                ),
                               ),
                               const SizedBox(height: 20),
                             ],
@@ -1266,26 +1273,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               ),
                               Row(
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.expand_more,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isMinimized = false;
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Expandir desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.expand_more,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isMinimized = false;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _activeChallengeType = null;
-                                        _isMinimized = false;
-                                        _isPlayingAudio = false;
-                                        challengePlayer?.stop();
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Fechar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _activeChallengeType = null;
+                                            _isMinimized = false;
+                                            _isPlayingAudio = false;
+                                            challengePlayer?.stop();
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1297,30 +1316,42 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.expand_less,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isMinimized = true;
-                                        if (_isPlayingAudio) {
-                                          _isPlayingAudio = false;
-                                          challengePlayer?.stop();
-                                        }
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Minimizar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.expand_less,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _isMinimized = true;
+                                            if (_isPlayingAudio) {
+                                              _isPlayingAudio = false;
+                                              challengePlayer?.stop();
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close,
-                                        color: Colors.white),
-                                    onPressed: () {
-                                      setState(() {
-                                        _activeChallengeType = null;
-                                        _isMinimized = false;
-                                        _isPlayingAudio = false;
-                                        challengePlayer?.stop();
-                                      });
-                                    },
+                                  Semantics(
+                                    label: 'Fechar desafio',
+                                    button: true,
+                                    child: ExcludeSemantics(
+                                      child: IconButton(
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          setState(() {
+                                            _activeChallengeType = null;
+                                            _isMinimized = false;
+                                            _isPlayingAudio = false;
+                                            challengePlayer?.stop();
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1337,23 +1368,29 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 ),
                               ),
                               const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ElevatedButton.icon(
-                                    onPressed: _isPlayingAudio
-                                        ? _toggleAudioPlayback
-                                        : _repeatAudio,
-                                    icon: Icon(
-                                      _isPlayingAudio
-                                          ? Icons.pause
-                                          : Icons.replay,
-                                    ),
-                                    label: Text(
-                                      _isPlayingAudio ? "Pausar" : "Reproduzir",
-                                    ),
+                              Semantics(
+                                label: _isPlayingAudio
+                                    ? 'Pausar áudio do desafio'
+                                    : 'Reproduzir áudio do desafio',
+                                button: true,
+                                child: ExcludeSemantics(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        onPressed: _isPlayingAudio
+                                            ? _toggleAudioPlayback
+                                            : _repeatAudio,
+                                        icon: Icon(_isPlayingAudio
+                                            ? Icons.pause
+                                            : Icons.replay),
+                                        label: Text(_isPlayingAudio
+                                            ? "Pausar"
+                                            : "Reproduzir"),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                               const SizedBox(height: 20),
                             ],
@@ -1375,12 +1412,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _controller.processKey(key, context);
       _currentNoteIndex = -1;
       if (key == 'C') {
-      // Quando limpa a tela, para o estado de reprodução
-      _isPlaying = false;
-      _currentNoteIndex = null;
-    }
+        _isPlaying = false;
+        _currentNoteIndex = null;
+      }
 
-      // Fala o resultado se necessário
       if (key == '=' && _autoReadResult && _controller.isResultDisplayed) {
         var raw = _controller.display.replaceAll('.', ',');
         const maxChars = 20;

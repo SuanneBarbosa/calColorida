@@ -249,7 +249,7 @@ class CalculatorController {
         if (_ignoreZeros) {
            digitsToPlay = digitsToPlay.sublist(0, maxDigits);
         } else {
-           digitsToPlay = digitsToPlay.sublist(0, maxDigits); //ou original digits, se necessário.
+           digitsToPlay = digitsToPlay.sublist(0, maxDigits); 
         }
 
       }
@@ -290,9 +290,7 @@ class CalculatorController {
     }
   }
 
-  Future<void> stopMelody() async {
-    // stopPlayback();////////////////////// verificar isso
-    
+  Future<void> stopMelody() async {    
     await stopMainAudio(); 
   }
 
@@ -352,7 +350,6 @@ class CalculatorController {
     }
 
    
-    // print(_display);
     if (_isResultDisplayed) {
       _display = _display.replaceAll(RegExp(r'0+$'), '');
       if (_display.endsWith('.')) {
@@ -560,7 +557,7 @@ class CalculatorController {
   void deleteMosaic(int index) async {
     if (index >= 0 && index < savedMosaics.length) {
       savedMosaics.removeAt(index);
-      await _saveMosaicsToPreferences(); // Salva a lista atualizada
+      await _saveMosaicsToPreferences(); 
     }
   }
 
@@ -623,7 +620,7 @@ class CalculatorController {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Fecha o modal
+                Navigator.of(context).pop();
               },
               child: const Text("OK"),
             ),

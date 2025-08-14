@@ -44,3 +44,9 @@ app.*.map.json
 
 
 codigo_consolidado.txt
+# Build-related files
+build/
+.cxx/
+**/android/app/.cxx/
+
+

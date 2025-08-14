@@ -40,11 +40,11 @@ class _MosaicDisplayState extends State<MosaicDisplay> {
         double safeAvailableHeight =
             (availableHeight.isFinite && !availableHeight.isNaN)
                 ? availableHeight
-                : 100.0; // um valor padrão qualquer que não seja zero
+                : 100.0; 
 
         double ratio = safeAvailableHeight / safeSquareSize;
         if (!ratio.isFinite || ratio.isNaN) {
-          ratio = 1.0; // fallback
+          ratio = 1.0;
         }
 
         int maxRows = ratio.floor();

@@ -50,7 +50,7 @@ class UsageInstructionsScreen extends StatelessWidget {
                   '- Zoom do mosaico: Use o slider "Zoom do Mosaico" para alterar o tamanho dos quadrados no mosaico, aumentando ou diminuindo o nível de detalhe exibido.\n'
                   '- Velocidade de reprodução: Ajuste o slider com o ícone de velocidade para controlar a duração de cada nota musical reproduzida, tornando-a mais lenta ou mais rápida.\n'
                   '- Ignorar Zeros: Ative essa opção para evitar que os zeros sejam reproduzidos e destacados quando o botão play for acionado.\n'
-                  '- Ler Resultado: Ative essa opção para que o resultado exibido na tela seja lido automaticamente após a realização de uma operação.\n'
+                  '- Falar Resultado: Ative essa opção para que o resultado exibido na tela seja lido automaticamente após a realização de uma operação.\n'
                   '- Tempo entre notas: Ajuste o slider com o ícone de ampulheta para aumentar ou diminuir a diferença de tempo entre as notas que estão tocando.\n',
                  semanticsDescription:'',
             

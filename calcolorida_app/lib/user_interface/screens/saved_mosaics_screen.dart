@@ -18,14 +18,12 @@ class SavedMosaicsScreen extends StatefulWidget {
 class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
   int? _currentPlayingIndex;
   int? _currentNoteIndex;
-  // bool _isPlaying = false;
-  // int _noteDurationMs = 500;
 
   @override
   void initState() {
     super.initState();
     initializeMainAudio();
-  initializeChallengeAudio();
+    initializeChallengeAudio();
   }
 
   @override
@@ -38,7 +36,6 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
   Widget build(BuildContext context) {
     final Map<String, Color> digitColors = widget.controller.digitColors;
     const int decimalPlaces = 400;
-    // const int digitsPerRow = 40;
     const double squareSize = 10.0;
 
     return Scaffold(
@@ -59,9 +56,7 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    color: mosaic.isFixed
-                        ? Colors.blue.shade50
-                        : Colors.white, // Cor diferente para mosaicos fixos
+                    color: mosaic.isFixed ? Colors.blue.shade50 : Colors.white,
                     child: Card(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -70,60 +65,85 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _applySavedMosaic(mosaic);
-                                    print(
-                                        'Aplicando mosaico: operação=${mosaic.operation}, resultado=${mosaic.result}');
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: Colors.white, backgroundColor: Colors.blue,
-                                    textStyle: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
+                                Semantics(
+                                  label: 'Aplicar mosaico na tela principal',
+                                  button: true,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _applySavedMosaic(mosaic);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.blue,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(9.0),
+                                      ),
+                                      textStyle: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
                                     ),
+                                    child: const Text('Aplicar'),
                                   ),
-                                  child: const Text('Aplicar'),
                                 ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.delete,
-                                    color: mosaic.isFixed
-                                        ? Colors.grey
-                                        : Colors.red,
-                                    size: 35,
+                                const SizedBox(width: 8),
+                                Semantics(
+                                  label: mosaic.isFixed
+                                      ? 'Mosaico fixo. Não pode ser excluído'
+                                      : 'Excluir mosaico',
+                                  button: true,
+                                  enabled: !mosaic.isFixed,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: mosaic.isFixed
+                                          ? Colors.grey
+                                          : Colors.red,
+                                      size: 35,
+                                    ),
+                                    onPressed: mosaic.isFixed
+                                        ? null
+                                        : () {
+                                            _confirmDeletion(index);
+                                          },
                                   ),
-                                  onPressed: mosaic.isFixed
-                                      ? null 
-                                      : () {
-                                          _confirmDeletion(index);
-                                        },
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: 200,
-                            child: MosaicDisplay(
-                              result: mosaic.result,
-                              digitColors: digitColors,
-                              decimalPlaces: decimalPlaces,
-                              digitsPerRow: mosaic.mosaicDigitsPerRow,
-                              squareSize: squareSize,
-                              currentNoteIndex: _currentPlayingIndex == index
-                                  ? _currentNoteIndex
-                                  : null,
-                              onNoteTap: null,
-                              onMaxDigitsCalculated: null,
+                          Semantics(
+                            label: 'Visualização do mosaico',
+                            child: ExcludeSemantics(
+                              child: SizedBox(
+                                height: 200,
+                                child: MosaicDisplay(
+                                  result: mosaic.result,
+                                  digitColors: digitColors,
+                                  decimalPlaces: decimalPlaces,
+                                  digitsPerRow: mosaic.mosaicDigitsPerRow,
+                                  squareSize: squareSize,
+                                  currentNoteIndex:
+                                      _currentPlayingIndex == index
+                                          ? _currentNoteIndex
+                                          : null,
+                                  onNoteTap: null,
+                                  onMaxDigitsCalculated: null,
+                                ),
+                              ),
                             ),
                           ),
-                          ListTile(
-                            title: Text(
-                              'Operação: ${mosaic.operation}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.blueAccent,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Semantics(
+                              label: 'Operação realizada: ${mosaic.operation}',
+                              child: Text(
+                                'Operação: ${mosaic.operation}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Colors.blueAccent,
+                                ),
                               ),
                             ),
                           ),
@@ -142,17 +162,42 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Excluir Mosaico'),
-          content: const Text('Deseja realmente excluir este mosaico?'),
+          title: const Center(
+            child: Text(
+              'Excluir Mosaico',
+              textAlign: TextAlign.center,
+            ),
+          ),
+          content: const Text(
+            'Deseja realmente excluir este mosaico?',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15),
+          ),
+          actionsAlignment: MainAxisAlignment.center, 
           actions: [
-            TextButton(
-              child: const Text('Cancelar'),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(6.0), 
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: const Text('Cancelar'),
             ),
-            TextButton(
-              child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(6.0), 
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   widget.controller.deleteMosaic(index);
@@ -162,6 +207,7 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
                   const SnackBar(content: Text('Mosaico excluído com sucesso')),
                 );
               },
+              child: const Text('Excluir'),
             ),
           ],
         );
@@ -175,10 +221,6 @@ class _SavedMosaicsScreenState extends State<SavedMosaicsScreen> {
     widget.controller.selectedInstrument = mosaic.instrument;
     widget.controller.noteDurationMs = mosaic.noteDurationMs;
     widget.controller.mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
-
-    // setState(() {
-    //   _mosaicDigitsPerRow = mosaic.mosaicDigitsPerRow;
-    // });
 
     await widget.controller.saveSettings();
 
